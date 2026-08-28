@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example File - Process Simulate Tutorial</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="brand">🦾 Process Simulate Tutorial <span class="badge">TH</span></a>
+        <nav class="main-nav">
+            <a href="index.html">หน้าแรก</a>
+            <a href="basic.html">Basic</a>
+            <a href="advanced.html">Advanced</a>
+            <a href="examples.html" class="active">Example File</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <h1>Example File: ตัวอย่างเซลล์การผลิตจริง</h1>
+    <p class="lead">ฝึกทำตามตัวอย่างเหล่านี้เพื่อความเข้าใจที่ลึกขึ้น ไฟล์ Study จริงของ Process Simulate ใช้นามสกุล <code>.psz</code> สามารถอัปโหลดเพิ่มในโฟลเดอร์ <code>/examples</code> ของ repo นี้ได้</p>
+
+    <div class="note">
+        <strong>วิธีเพิ่มไฟล์ตัวอย่างจริง:</strong> สร้างโฟลเดอร์ <code>examples/</code> แล้ววางไฟล์ <code>.psz</code> ของคุณลงไป
+        จากนั้นใส่ลิงก์ดาวน์โหลดในหน้านี้ เช่น <code>&lt;a href="examples/cell-01.psz"&gt;ดาวน์โหลด&lt;/a&gt;</code>
+    </div>
+
+    <h2>ตัวอย่างที่ 1: เซลล์หยิบ-วางเดี่ยว (Single Robot Pick and Place)</h2>
+    <p><strong>โครงสร้าง:</strong> <code>Robot → Operation(Pick) → Operation(Place)</code></p>
+    <ul>
+        <li>Robot: 6-axis, ติดตั้ง Gripper แบบ 2 นิ้ว</li>
+        <li>Part: ชิ้นงานที่จุดหยิบ 1 ตำแหน่ง จุดวาง 1 ตำแหน่ง</li>
+        <li>Cycle Time เป้าหมาย: ไม่เกิน 8 วินาทีต่อรอบ</li>
+    </ul>
+    <p><strong>คำถามฝึกคิด:</strong> รันแล้วชิ้นงานไม่เคลื่อนที่ตามหุ่นยนต์ตอน Place ทั้งที่ Pose ถูกต้อง เกิดจากอะไร?</p>
+    <div class="tip"><strong>เฉลย:</strong> ลืมสั่ง <code>Attach</code> ชิ้นงานเข้ากับปลายแขนหุ่นยนต์ใน Operation Pick — ต้อง Attach ตอนหยิบ และ Detach ตอนวาง ไม่งั้นชิ้นงานจะค้างอยู่ตำแหน่งเดิมตลอดการจำลอง</div>
+
+    <h2>ตัวอย่างที่ 2: สองหุ่นยนต์ทำงานร่วมกันในเซลล์เดียว (Dual Robot Cell)</h2>
+    <p><strong>โครงสร้าง:</strong> <code>Robot1 (Weld) + Robot2 (Handling)</code> ทำงานพร้อมกันในพื้นที่ที่มีจุดตัด (Shared Zone)</p>
+    <p>ใช้ Logic Block ผูก Signal กันชนกัน (Interlock) ระหว่างสองหุ่นยนต์</p>
+    <pre><code>// แนวคิด Interlock Logic
+Robot1.InZoneA == true  --> Robot2.HoldAtWaitPoint = true
+Robot1.InZoneA == false --> Robot2.HoldAtWaitPoint = false
+</code></pre>
+    <p><strong>คำถามฝึกคิด:</strong> ถ้าไม่ใส่ Interlock จะเกิดอะไรขึ้นเมื่อทั้งสองหุ่นยนต์เข้าพื้นที่ Shared Zone พร้อมกัน?</p>
+    <div class="tip"><strong>เฉลย:</strong> Collision Detection จะรายงานการชนกันของแขนหุ่นยนต์ทั้งสองตัวใน Shared Zone — ในเซลล์จริงคือความเสียหายของอุปกรณ์ จึงต้องมี Interlock ทุกครั้งที่มีพื้นที่ทำงานร่วมกัน</div>
+
+    <h2>ตัวอย่างที่ 3: จุดเชื่อม Weld Point และการลด Cycle Time</h2>
+    <p>Study ที่มี Weld Point Operation 20 จุด เรียงลำดับใน PERT chart แบบเส้นตรง (Sequential)</p>
+    <p><strong>คำถามฝึกคิด:</strong> จะลด Cycle Time รวมของ Study นี้โดยไม่ลดจำนวนจุดเชื่อมได้อย่างไร?</p>
+    <div class="tip"><strong>เฉลย:</strong> จัดกลุ่มจุดเชื่อมที่อยู่ใกล้กันให้ Robot เคลื่อนที่เป็นเส้นทางสั้นที่สุด (Path Optimization) และพิจารณาใช้ 2 หุ่นยนต์เชื่อมคนละฝั่งพร้อมกัน (Parallel Operation ใน PERT chart) แทนการเรียงจุดแบบ Sequential ทั้งหมด</div>
+
+    <div class="page-nav">
+        <a href="advanced.html">← ก่อนหน้า: Advanced</a>
+        <a href="index.html">กลับหน้าแรก</a>
+    </div>
+</main>
+
+<footer class="site-footer">
+    Process Simulate Tutorial — เอกสารประกอบการเรียนรู้ภายในทีม
+</footer>
+</body>
+</html>

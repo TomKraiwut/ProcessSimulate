@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced - Process Simulate Tutorial</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="brand">🦾 Process Simulate Tutorial <span class="badge">TH</span></a>
+        <nav class="main-nav">
+            <a href="index.html">หน้าแรก</a>
+            <a href="basic.html">Basic</a>
+            <a href="advanced.html" class="active">Advanced</a>
+            <a href="examples.html">Example File</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <h1>Advanced: Logic Block, .NET Automation และ Offline Programming</h1>
+    <p class="lead">เมื่อสร้างงานพื้นฐานได้แล้ว ขั้นต่อไปคือควบคุมพฤติกรรมของเซลล์ด้วย Logic และส่งออกโปรแกรมไปใช้กับหุ่นยนต์จริง</p>
+
+    <h2>1. Logic Block คืออะไร</h2>
+    <p>
+        Process Simulate ใช้ <strong>Logic Block</strong> (Resource ประเภท Logic) ผูกกับ Signal ของอุปกรณ์ เช่น Gripper, Sensor, Door
+        เพื่อกำหนดเงื่อนไขการทำงาน คล้าย Ladder Logic ของ PLC โดยไม่ต้องเขียนโค้ดข้อความ
+    </p>
+
+    <div class="note">
+        <strong>ก่อนเริ่ม:</strong> สร้าง Logic Resource จากเมนู <code>Modeling → Logic Block</code> แล้วผูก Input/Output Signal
+        เข้ากับ Operation หรืออุปกรณ์ที่ต้องการควบคุม
+    </div>
+
+    <h2>2. ตัวอย่าง Logic: ประตูนิรภัยเปิดเมื่อหุ่นยนต์หยุดสนิท</h2>
+    <pre><code>// แนวคิด Signal wiring ใน Logic Block
+Robot.AtHomePosition == true  AND  CycleComplete == true
+    --> SafetyDoor.Open = true
+</code></pre>
+
+    <p>ตัวอย่างการใช้ .NET API (C#) ของ Process Simulate เพื่อไล่อ่านรายการ Operation ทั้งหมดใน Study แบบอัตโนมัติ:</p>
+    <pre><code>using Tecnomatix.Engineering;
+
+public class ListOperations
+{
+    public static void Run()
+    {
+        PmStudy study = PS.Study;
+        foreach (PmOperation op in study.GetAllOperations())
+        {
+            Console.WriteLine("Operation: " + op.Name + " | Time: " + op.Time);
+        }
+    }
+}
+</code></pre>
+
+    <h2>3. ตัวอย่าง .NET API: สลับ Resource อัตโนมัติแล้วเช็คการชนซ้ำ</h2>
+    <p>ใช้แทนการปรับ Layout ด้วยมือทีละแบบ เมื่อต้องการเทียบหลาย Scenario เช่น ตำแหน่งหุ่นยนต์หลายจุด</p>
+    <pre><code>using Tecnomatix.Engineering;
+
+public class CollisionSweep
+{
+    public static void Run()
+    {
+        double[] robotOffsets = { 0, 50, 100 };
+        foreach (double offset in robotOffsets)
+        {
+            // ปรับตำแหน่ง Robot Resource แล้วรัน Collision Detection
+            PS.CollisionDetection.RunOnce();
+            Console.WriteLine("Offset " + offset + " -> collisions: "
+                + PS.CollisionDetection.CollisionCount);
+        }
+    }
+}
+</code></pre>
+
+    <h2>4. Offline Programming (OLP)</h2>
+    <p>
+        เมื่อ Pose และลำดับ Operation ผ่านการตรวจสอบในซอฟต์แวร์แล้ว ใช้ฟีเจอร์ <strong>OLP (Offline Programming)</strong>
+        แปลง Pose/Path ที่ Teach ไว้เป็นโปรแกรมควบคุมในภาษาเฉพาะของยี่ห้อหุ่นยนต์ เช่น RAPID (ABB), KRL (KUKA), TP (FANUC)
+        แล้วส่งไฟล์นั้นไปโหลดใช้กับหุ่นยนต์จริงได้ทันที ลดเวลา Teach หน้างาน
+    </p>
+    <ol class="steps">
+        <li>ตรวจสอบว่า Operation และ Pose ทั้งหมดผ่าน Reachability และ Collision Check แล้ว</li>
+        <li>เปิดเมนู <strong>Robotics → OLP → Generate Program</strong></li>
+        <li>เลือก Robot Controller/ยี่ห้อที่ตรงกับหุ่นยนต์จริง</li>
+        <li>Export ไฟล์โปรแกรมออกมา แล้วโหลดเข้า Controller ของหุ่นยนต์จริง</li>
+    </ol>
+
+    <h2>5. Resource Library และการนำกลับมาใช้ซ้ำ</h2>
+    <p>
+        เก็บ Robot, Gripper, Fixture มาตรฐานไว้ใน <strong>Resource Library</strong> กลาง แล้วดึงมาใช้ข้าม Study/โปรเจกต์ได้
+        โดยไม่ต้องสร้างใหม่ทุกครั้ง ช่วยให้ทีมงานหลายคนใช้ทรัพยากรชุดเดียวกันสอดคล้องกัน
+    </p>
+
+    <div class="tip">
+        <strong>Tip:</strong> ตั้งชื่อ Operation และ Signal ให้สื่อความหมายเสมอ (เช่น <code>Pick_PartA_Station1</code>)
+        เพราะเมื่อ Study มี Operation หลายร้อยตัว การไล่ดูใน PERT chart จะยากมากถ้าตั้งชื่อไม่สื่อความหมาย
+    </div>
+
+    <div class="page-nav">
+        <a href="basic.html">← ก่อนหน้า: Basic</a>
+        <a href="examples.html">ถัดไป: Example File →</a>
+    </div>
+</main>
+
+<footer class="site-footer">
+    Process Simulate Tutorial — เอกสารประกอบการเรียนรู้ภายในทีม
+</footer>
+</body>
+</html>
