@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5. Human Simulation เบื้องต้น — Process Simulate Tutorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div id="wrapper">
+  <div id="main">
+    <div class="inner">
+      <header id="header">
+        <a href="../index.html" class="logo"><span>Process Simulate Tutorial</span></a>
+        <button class="menu-toggle" aria-label="เปิดเมนู">☰</button>
+      </header>
+
+      <main>
+        <h1>5. Human Simulation เบื้องต้น</h1>
+
+        <div class="objectives">
+          <p>วัตถุประสงค์การเรียนรู้</p>
+          <ol>
+          <li>สร้าง Human ด้วย Quick Create/Human Library และเลือก Anthropometric Database ให้เหมาะกับกลุ่มผู้ปฏิบัติงานได้</li>
+          <li>ใช้เครื่องมือวิเคราะห์การยศาสตร์ (RULA, OWAS) ประเมินความเสี่ยงบาดเจ็บจากท่าทางเบื้องต้นได้</li>
+          </ol>
+        </div>
+
+<h2>สร้าง Human ในเซลล์</h2>
+<p>นอกจากหุ่นยนต์ Process Simulate ยังจำลองการทำงานของคนในเซลล์ได้ผ่านโมดูล <strong>Process Simulate Human</strong> —
+สร้าง Human ได้เร็วด้วย <strong>Quick Create</strong> (เลือกรูปร่างมาตรฐานตามหน่วยงาน เพื่อให้ทุกการวิเคราะห์ใช้สัดส่วนคนชุดเดียวกัน)
+หรือบันทึกไว้ใน <strong>Human Library</strong> เพื่อดึงกลับมาใช้ซ้ำโดยไม่ต้องตั้งค่าใหม่ทุกครั้ง — Library ปรับแต่งได้ทั้งฐานข้อมูล
+สัดส่วนร่างกาย ขนาดตัวเฉพาะ และรูปลักษณ์ตามภูมิภาค</p>
+
+<h2>Anthropometric Database และ Percentile</h2>
+<p>ความแม่นยำของการวิเคราะห์ท่าทางขึ้นกับฐานข้อมูลสัดส่วนร่างกาย (Anthropometric Database) ที่เลือกใช้ ซึ่งมีให้เลือกตามภูมิภาค/มาตรฐาน
+เช่น <strong>ANSUR/ANSUR II</strong> (กองทัพสหรัฐฯ), <strong>CHINESE</strong> (GB 10000-88), <strong>GERMAN</strong> (DIN 33402),
+<strong>JAPANESE</strong>/<strong>KOREAN</strong> (ISO 7250-1), <strong>NHANES</strong> (ประชากรสหรัฐฯ) — เลือกฐานข้อมูลให้ตรงกับกลุ่มผู้ปฏิบัติงานจริง
+เพื่อไม่ให้ผลวิเคราะห์คลาดเคลื่อน</p>
+<p>ค่าที่แสดงในตารางสัดส่วนมักอ้างอิงเป็น <strong>Percentile</strong> เช่น <strong>50th percentile</strong> หมายถึงค่าเฉลี่ยที่เป็นไปได้มากที่สุด
+ของกลุ่มตัวอย่าง — การออกแบบสถานีงานที่ดีมักตรวจสอบทั้งช่วง Percentile ต่ำและสูง ไม่ใช่แค่ค่าเฉลี่ยเพียงค่าเดียว
+เพื่อให้คนตัวเล็กสุดและใหญ่สุดในกลุ่มยังทำงานได้โดยไม่บาดเจ็บ</p>
+
+<h2>Human Posturing</h2>
+<p>กำหนดท่าทางของ Human ได้ผ่าน <strong>Posture Library</strong> ซึ่งมีท่าทำงานสำเร็จรูป (เอื้อม, ก้ม, ยก) ให้เลือกใช้แทนการปรับข้อต่อทีละจุดเอง
+ใกล้เคียงกับการ Teach Pose ของหุ่นยนต์ในแนวคิด แต่ใช้กับโครงร่างมนุษย์</p>
+
+<h2>เครื่องมือวิเคราะห์การยศาสตร์ (Ergonomic Analysis)</h2>
+<table>
+<tr><th>เครื่องมือ</th><th>ใช้ประเมินอะไร</th></tr>
+<tr><td><strong>RULA</strong> (Rapid Upper Limb Assessment)</td><td>ความเสี่ยงบาดเจ็บช่วงแขน-มือจากท่าทาง แรง และระยะเวลาทำงาน ให้คะแนน 4 ระดับ ตั้งแต่ท่าที่ยอมรับได้ (คะแนน 1-2) ไปจนถึงต้องแก้ไขทันที (คะแนน 7)</td></tr>
+<tr><td><strong>OWAS</strong></td><td>วิเคราะห์ท่าทางหลัง แขน ขา และศีรษะ ออกเป็นรหัสท่าทาง 5 หลัก (เช่น 2321-1) บอกระดับความเร่งด่วนในการแก้ไข</td></tr>
+<tr><td><strong>NIOSH (Low Back Analysis)</strong></td><td>ประเมินภาระที่หลังส่วนล่างเทียบกับค่ามาตรฐานที่ปลอดภัย</td></tr>
+<tr><td><strong>Strain Index</strong></td><td>ความเสี่ยงบาดเจ็บของมือ/ข้อมือ/ปลายแขนจากงานที่ใช้มือซ้ำๆ ความถี่สูง</td></tr>
+</table>
+<p>Process Simulate ดึงค่าท่าทางจากโมเดลมาใส่ในเครื่องมือวิเคราะห์เหล่านี้ให้อัตโนมัติ ไม่ต้องวัดมุมข้อต่อเอง — ทำให้ตรวจสอบ Ergonomics
+ได้ตั้งแต่ขั้นออกแบบเซลล์บนคอมพิวเตอร์ ก่อนมีคนทำงานจริงหน้างาน</p>
+
+<div class="note">
+<strong>ข้อควรระวัง:</strong> เมื่อคนและหุ่นยนต์ทำงานในพื้นที่ร่วมกัน ต้องตรวจสอบ Collision และใส่ตรรกะกันชน/Interlock ผ่าน CEE
+เช่นเดียวกับกรณีหุ่นยนต์สองตัวทำงานร่วมกัน (ดู Advanced บทที่ 6) เพื่อความปลอดภัยของผู้ปฏิบัติงานจริง
+</div>
+
+<div class="tip">
+<strong>คำถามฝึกคิด:</strong> ทำไมต้องเลือก Anthropometric Database ให้ตรงกับกลุ่มผู้ปฏิบัติงานจริง แทนที่จะใช้ค่าเริ่มต้นของโปรแกรมเสมอ?
+</div>
+<div class="tip"><strong>เฉลย:</strong> สัดส่วนร่างกายเฉลี่ยต่างกันตามภูมิภาคและกลุ่มประชากรอย่างมีนัยสำคัญ (เช่น ฐานข้อมูล CHINESE/JAPANESE/KOREAN
+ให้ค่าต่างจาก ANSUR ของกองทัพสหรัฐฯ) หากใช้ฐานข้อมูลผิดกลุ่ม ผลวิเคราะห์ RULA/OWAS อาจบอกว่าท่าทางปลอดภัย
+ทั้งที่จริงไม่เหมาะกับสัดส่วนคนงานจริงในโรงงาน</div>
+
+        <div class="page-nav">
+          <a href="04.html">← ก่อนหน้า: 4. Offline Programming (OLP)</a>
+          <a href="06.html">ถัดไป: 6. Multi-Robot Cell และ Interlock →</a>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        Process Simulate Tutorial — เอกสารประกอบการเรียนรู้ภายในทีม
+      </footer>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="inner">
+      <nav id="menu">
+        <header class="major"><h2>เมนู</h2></header>
+        <ul>
+          <li><a href="../index.html">หน้าแรก</a></li>
+          <li class="has-children">
+            <a href="../basic/index.html">Basic — พื้นฐาน</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู basic">▾</button>
+            <ul class="submenu">
+              <li><a href="../basic/01.html">1. Process Simulate คืออะไร</a></li>
+              <li><a href="../basic/02.html">2. หน้าตาโปรแกรม</a></li>
+              <li><a href="../basic/03.html">3. Object พื้นฐาน 6 ตัว</a></li>
+              <li><a href="../basic/04.html">4. สร้างงานแรก: Pick and Place</a></li>
+              <li><a href="../basic/05.html">5. รันและอ่านผลลัพธ์เบื้องต้น</a></li>
+              <li><a href="../basic/06.html">6. บันทึกและจัดการไฟล์ Study</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../intermediate/index.html">Intermediate — ขั้นกลาง</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู intermediate">▾</button>
+            <ul class="submenu">
+              <li><a href="../intermediate/01.html">1. Resource ขั้นกลาง</a></li>
+              <li><a href="../intermediate/02.html">2. Path และ Location ขั้นสูง</a></li>
+              <li><a href="../intermediate/03.html">3. Weld Point และ Weld Line Operation</a></li>
+              <li><a href="../intermediate/04.html">4. Sequence Editor และ PERT chart ขั้นกลาง</a></li>
+              <li><a href="../intermediate/05.html">5. Collision Set และการตรวจสอบการชนขั้นสูง</a></li>
+              <li><a href="../intermediate/06.html">6. Resource Library และการนำกลับมาใช้ซ้ำ</a></li>
+            </ul>
+          </li>
+          <li class="has-children expanded">
+            <a href="index.html">Advanced — ขั้นสูง</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู advanced">▾</button>
+            <ul class="submenu">
+              <li><a href="01.html">1. Logic Block และ Signal พื้นฐาน</a></li>
+              <li><a href="02.html">2. .NET API พื้นฐาน</a></li>
+              <li><a href="03.html">3. .NET API ขั้นสูง: ไล่อ่าน Study อัตโนมัติ</a></li>
+              <li><a href="04.html">4. Offline Programming (OLP)</a></li>
+              <li class="active"><a href="05.html">5. Human Simulation เบื้องต้น</a></li>
+              <li><a href="06.html">6. Multi-Robot Cell และ Interlock</a></li>
+              <li><a href="07.html">7. Study Manager และการจัดการเวอร์ชันไฟล์</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../object-reference/index.html">Object Reference — สาธิต Object</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู object-reference">▾</button>
+            <ul class="submenu">
+              <li><a href="../object-reference/01.html">1. Resource Objects</a></li>
+              <li><a href="../object-reference/02.html">2. Operation Objects</a></li>
+              <li><a href="../object-reference/03.html">3. Logic &amp; Analysis Objects</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../case-study/index.html">Case Study — ตัวอย่างอุตสาหกรรม</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู case-study">▾</button>
+            <ul class="submenu">
+              <li><a href="../case-study/01.html">1. อุตสาหกรรมยานยนต์ (Body-in-White Welding)</a></li>
+              <li><a href="../case-study/02.html">2. งานหยิบจับและบรรจุภัณฑ์ (Material Handling)</a></li>
+              <li><a href="../case-study/03.html">3. งานพ่นสี (Paint Shop Simulation)</a></li>
+              <li><a href="../case-study/04.html">4. อิเล็กทรอนิกส์ (Precision Pick and Place)</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../tips-tricks/index.html">Tips and Tricks — เทคนิคการทำงาน</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู tips-tricks">▾</button>
+            <ul class="submenu">
+              <li><a href="../tips-tricks/01.html">1. UI และ Workflow</a></li>
+              <li><a href="../tips-tricks/02.html">2. การสร้างโมเดลและดีบัก</a></li>
+              <li><a href="../tips-tricks/03.html">3. ประสิทธิภาพการรัน (Performance)</a></li>
+              <li><a href="../tips-tricks/04.html">4. .NET API และ Logic Scripting</a></li>
+            </ul>
+          </li>
+          <li><a href="../examples.html">Example File</a></li>
+        </ul>
+      </nav>
+      <footer id="footer"><p class="copyright">Process Simulate Tutorial — เอกสารประกอบการเรียนรู้ภายในทีม</p></footer>
+    </div>
+  </div>
+  <div id="sidebar-overlay"></div>
+</div>
+<script src="../assets/main.js"></script>
+</body>
+</html>

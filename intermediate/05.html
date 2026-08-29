@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5. Collision Set และการตรวจสอบการชนขั้นสูง — Process Simulate Tutorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div id="wrapper">
+  <div id="main">
+    <div class="inner">
+      <header id="header">
+        <a href="../index.html" class="logo"><span>Process Simulate Tutorial</span></a>
+        <button class="menu-toggle" aria-label="เปิดเมนู">☰</button>
+      </header>
+
+      <main>
+        <h1>5. Collision Set และการตรวจสอบการชนขั้นสูง</h1>
+
+        <div class="objectives">
+          <p>วัตถุประสงค์การเรียนรู้</p>
+          <ol>
+          <li>รวมกลุ่มวัตถุเป็น Collision Set เพื่อตรวจสอบการชนอย่างมีระบบ</li>
+          <li>แยกความแตกต่างของ Static และ Dynamic Collision Detection ได้</li>
+          </ol>
+        </div>
+
+<h2>Collision Set คืออะไร</h2>
+<p>แทนที่จะตรวจสอบการชนของทุก Object ในเซลล์กับทุก Object (ซึ่งช้าและมี False Positive เยอะ เช่น หุ่นยนต์ "ชน" กับพื้นโรงงานที่ตั้งอยู่)
+Process Simulate ให้จัดกลุ่ม Object เป็น <strong>Collision Set</strong> แล้วกำหนดว่าคู่ไหนต้องเช็คการชนกันบ้าง เช่น
+"Robot A" กับ "Fixture B" แต่ไม่ต้องเช็คกับพื้นโรงงาน</p>
+
+<ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก Object ที่ต้องการตรวจสอบการชน (เช่น Robot, Fixture, Tool)</span></li>
+    <li><span class="num">2</span><span class="text">สร้าง Collision Set ใหม่ แล้วเพิ่ม Object เหล่านั้นเข้ากลุ่ม</span></li>
+    <li><span class="num">3</span><span class="text">กำหนดคู่ที่ต้องการเช็คการชนภายใน Set นั้น</span></li>
+    <li><span class="num">4</span><span class="text">รัน Collision Detection แล้วดูผลใน Collision Report</span></li>
+  </ol>
+
+<h2>Static และ Dynamic Collision Detection</h2>
+<table>
+<tr><th>ประเภท</th><th>ลักษณะการทำงาน</th></tr>
+<tr><td><strong>Static</strong></td><td>เช็คการชน ณ ตำแหน่ง Pose หนึ่งจุด เหมาะกับตรวจสอบจุดเริ่ม/จุดจบของ Operation</td></tr>
+<tr><td><strong>Dynamic</strong></td><td>เช็คการชนตลอดเส้นทางเคลื่อนที่ระหว่าง Pose สองจุด จับการชนระหว่างทางที่ Static มองไม่เห็น</td></tr>
+</table>
+
+<div class="note">
+<strong>ข้อควรระวัง:</strong> การเช็คแบบ Static เพียงอย่างเดียวอาจพลาดจุดชนกลางทาง (เช่น แขนหุ่นยนต์กวาดผ่าน Fixture ระหว่างเคลื่อนที่
+แม้จุดเริ่มกับจุดจบจะไม่ชนก็ตาม) — งานที่มีอุปกรณ์หนาแน่นควรเปิด Dynamic Collision Detection ควบคู่ไปด้วยเสมอ
+</div>
+
+<p>นอกจากรู้ว่า "ชนหรือไม่ชน" ให้ใช้ <strong>Minimal Distance</strong> (จากบท Basic 5) วัดระยะห่างที่น้อยที่สุดระหว่างคู่ Object
+ใน Collision Set ที่สนใจ — มีประโยชน์เมื่อ Collision Report บอกว่า "ไม่ชน" แต่ต้องการรู้ว่าเหลือระยะเผื่อความปลอดภัยแค่ไหนจริงๆ</p>
+
+<div class="tip">
+<strong>คำถามฝึกคิด:</strong> ทำไมไม่ควรใส่ Object ทุกตัวในเซลล์ (รวมถึงพื้นโรงงานและผนัง) เข้า Collision Set เดียวกันหมด?
+</div>
+<div class="tip"><strong>เฉลย:</strong> จะทำให้ Collision Report เต็มไปด้วยรายการที่ไม่มีความหมาย (เช่น ฐานหุ่นยนต์ "ชน" กับพื้นที่มันตั้งอยู่)
+จนหารายการที่เป็นปัญหาจริงยาก ควรแบ่ง Collision Set ตามคู่ Object ที่มีความเสี่ยงชนกันจริงเท่านั้น</div>
+
+        <div class="page-nav">
+          <a href="04.html">← ก่อนหน้า: 4. Sequence Editor และ PERT chart ขั้นกลาง</a>
+          <a href="06.html">ถัดไป: 6. Resource Library และการนำกลับมาใช้ซ้ำ →</a>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        Process Simulate Tutorial — เอกสารประกอบการเรียนรู้ภายในทีม
+      </footer>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="inner">
+      <nav id="menu">
+        <header class="major"><h2>เมนู</h2></header>
+        <ul>
+          <li><a href="../index.html">หน้าแรก</a></li>
+          <li class="has-children">
+            <a href="../basic/index.html">Basic — พื้นฐาน</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู basic">▾</button>
+            <ul class="submenu">
+              <li><a href="../basic/01.html">1. Process Simulate คืออะไร</a></li>
+              <li><a href="../basic/02.html">2. หน้าตาโปรแกรม</a></li>
+              <li><a href="../basic/03.html">3. Object พื้นฐาน 6 ตัว</a></li>
+              <li><a href="../basic/04.html">4. สร้างงานแรก: Pick and Place</a></li>
+              <li><a href="../basic/05.html">5. รันและอ่านผลลัพธ์เบื้องต้น</a></li>
+              <li><a href="../basic/06.html">6. บันทึกและจัดการไฟล์ Study</a></li>
+            </ul>
+          </li>
+          <li class="has-children expanded">
+            <a href="index.html">Intermediate — ขั้นกลาง</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู intermediate">▾</button>
+            <ul class="submenu">
+              <li><a href="01.html">1. Resource ขั้นกลาง</a></li>
+              <li><a href="02.html">2. Path และ Location ขั้นสูง</a></li>
+              <li><a href="03.html">3. Weld Point และ Weld Line Operation</a></li>
+              <li><a href="04.html">4. Sequence Editor และ PERT chart ขั้นกลาง</a></li>
+              <li class="active"><a href="05.html">5. Collision Set และการตรวจสอบการชนขั้นสูง</a></li>
+              <li><a href="06.html">6. Resource Library และการนำกลับมาใช้ซ้ำ</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../advanced/index.html">Advanced — ขั้นสูง</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู advanced">▾</button>
+            <ul class="submenu">
+              <li><a href="../advanced/01.html">1. Logic Block และ Signal พื้นฐาน</a></li>
+              <li><a href="../advanced/02.html">2. .NET API พื้นฐาน</a></li>
+              <li><a href="../advanced/03.html">3. .NET API ขั้นสูง: ไล่อ่าน Study อัตโนมัติ</a></li>
+              <li><a href="../advanced/04.html">4. Offline Programming (OLP)</a></li>
+              <li><a href="../advanced/05.html">5. Human Simulation เบื้องต้น</a></li>
+              <li><a href="../advanced/06.html">6. Multi-Robot Cell และ Interlock</a></li>
+              <li><a href="../advanced/07.html">7. Study Manager และการจัดการเวอร์ชันไฟล์</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../object-reference/index.html">Object Reference — สาธิต Object</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู object-reference">▾</button>
+            <ul class="submenu">
+              <li><a href="../object-reference/01.html">1. Resource Objects</a></li>
+              <li><a href="../object-reference/02.html">2. Operation Objects</a></li>
+              <li><a href="../object-reference/03.html">3. Logic &amp; Analysis Objects</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../case-study/index.html">Case Study — ตัวอย่างอุตสาหกรรม</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู case-study">▾</button>
+            <ul class="submenu">
+              <li><a href="../case-study/01.html">1. อุตสาหกรรมยานยนต์ (Body-in-White Welding)</a></li>
+              <li><a href="../case-study/02.html">2. งานหยิบจับและบรรจุภัณฑ์ (Material Handling)</a></li>
+              <li><a href="../case-study/03.html">3. งานพ่นสี (Paint Shop Simulation)</a></li>
+              <li><a href="../case-study/04.html">4. อิเล็กทรอนิกส์ (Precision Pick and Place)</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../tips-tricks/index.html">Tips and Tricks — เทคนิคการทำงาน</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู tips-tricks">▾</button>
+            <ul class="submenu">
+              <li><a href="../tips-tricks/01.html">1. UI และ Workflow</a></li>
+              <li><a href="../tips-tricks/02.html">2. การสร้างโมเดลและดีบัก</a></li>
+              <li><a href="../tips-tricks/03.html">3. ประสิทธิภาพการรัน (Performance)</a></li>
+              <li><a href="../tips-tricks/04.html">4. .NET API และ Logic Scripting</a></li>
+            </ul>
+          </li>
+          <li><a href="../examples.html">Example File</a></li>
+        </ul>
+      </nav>
+      <footer id="footer"><p class="copyright">Process Simulate Tutorial — เอกสารประกอบการเรียนรู้ภายในทีม</p></footer>
+    </div>
+  </div>
+  <div id="sidebar-overlay"></div>
+</div>
+<script src="../assets/main.js"></script>
+</body>
+</html>

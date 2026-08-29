@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2. Path และ Location ขั้นสูง — Process Simulate Tutorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div id="wrapper">
+  <div id="main">
+    <div class="inner">
+      <header id="header">
+        <a href="../index.html" class="logo"><span>Process Simulate Tutorial</span></a>
+        <button class="menu-toggle" aria-label="เปิดเมนู">☰</button>
+      </header>
+
+      <main>
+        <h1>2. Path และ Location ขั้นสูง</h1>
+
+        <div class="objectives">
+          <p>วัตถุประสงค์การเรียนรู้</p>
+          <ol>
+          <li>เข้าใจว่า ExtTcp/Tool Center Point คืออะไร และทำไมต้องกำหนดให้ถูก</li>
+          <li>ใช้ Approach/Departure และ Via Point ควบคุมเส้นทางหุ่นยนต์ให้ปลอดภัยขึ้นได้</li>
+          </ol>
+        </div>
+
+<h2>Robot Frame: Base Frame และ Tool Center Point Frame</h2>
+<p>ตำแหน่งของหุ่นยนต์อ้างอิงจากสอง Frame หลักเสมอ: <strong>Base Frame</strong> (จุดฐานของหุ่นยนต์ที่ยึดกับพื้น/โครงสร้าง)
+และ <strong>Tool Center Point Frame (TCPF)</strong> — จุดอ้างอิงที่ปลาย Gripper/Tool ไม่ใช่ปลายแขนหุ่นยนต์เอง
+ทุกครั้งที่หุ่นยนต์เคลื่อนที่ไปยัง Pose หนึ่ง โปรแกรมคำนวณตำแหน่งจาก TCPF เทียบกับ Base Frame หากติดตั้ง Tool ยาวขึ้นหรือเปลี่ยน Tool
+ต้องปรับ <strong>ExtTcp</strong> (External TCP) ให้ตรงกับ Tool ตัวใหม่เสมอ ไม่งั้นตำแหน่งที่ Teach ไว้จะคลาดเคลื่อนทั้งหมด</p>
+
+<h2>Motion Type และ Path Editor</h2>
+<p>การเคลื่อนที่ระหว่าง Pose แต่ละแบบให้ผลต่างกัน ตั้งค่าได้ผ่าน <strong>Path Editor</strong>:</p>
+<table>
+<tr><th>Motion Type</th><th>ลักษณะการเคลื่อนที่</th></tr>
+<tr><td><strong>Joint</strong></td><td>แต่ละแกนหมุนไปพร้อมกันจนถึงเป้าหมาย เส้นทางไม่แน่นอนแต่เร็วที่สุด</td></tr>
+<tr><td><strong>Linear</strong></td><td>TCP เคลื่อนที่เป็นเส้นตรงระหว่างสองจุด ควบคุมเส้นทางได้แน่นอน เหมาะกับงานที่ต้องเลี่ยงสิ่งกีดขวาง</td></tr>
+<tr><td><strong>Circle</strong></td><td>TCP เคลื่อนที่เป็นส่วนโค้งผ่าน 3 จุดที่กำหนด ใช้กับงานที่ต้องการเส้นทางโค้งแม่นยำ</td></tr>
+</table>
+
+<h2>Frame of Reference เมื่อจัดวางตำแหน่ง</h2>
+<p>เวลาใช้ Placement Manipulator ลากจัดตำแหน่ง Object จะอ้างอิงจุดหมุนได้หลายแบบ: <strong>Geometric Center</strong>
+(จุดกึ่งกลางรูปทรงของ Object เอง), <strong>Working Frame</strong> (ระบบพิกัดอ้างอิงที่ตั้งไว้ล่วงหน้า) หรือ
+<strong>Self</strong> (อ้างอิงตำแหน่งของ Object เองหลัง Placement) — เลือกให้ตรงกับสิ่งที่ต้องการ เช่น จัดวางชิ้นงานให้กึ่งกลาง Fixture
+ควรใช้ Geometric Center ไม่ใช่ Self</p>
+
+<ol class="step-list">
+    <li><span class="num">1</span><span class="text">เปิด Attribute ของ Tool ที่ Mount กับ Robot</span></li>
+    <li><span class="num">2</span><span class="text">กำหนดค่า ExtTcp ให้ตรงกับตำแหน่งปลายจริงของ Tool (เช่น ปลายปืนเชื่อม หรือปลาย Gripper)</span></li>
+    <li><span class="num">3</span><span class="text">ทดสอบ Jog หุ่นยนต์แล้วสังเกตว่าจุดหมุนอ้างอิงเปลี่ยนไปตาม ExtTcp ที่ตั้งใหม่</span></li>
+  </ol>
+
+<h2>Approach / Departure และ Via Point</h2>
+<p>การเคลื่อนที่ตรงจากจุดหนึ่งไปอีกจุดหนึ่งอาจทำให้หุ่นยนต์ชนสิ่งกีดขวางระหว่างทาง จึงมักเพิ่มจุดกลาง:</p>
+<table>
+<tr><th>จุด</th><th>ใช้ทำอะไร</th></tr>
+<tr><td><strong>Approach</strong></td><td>จุดก่อนถึงตำแหน่งจริง ให้หุ่นยนต์เข้าใกล้อย่างปลอดภัยก่อนหยิบ/วาง</td></tr>
+<tr><td><strong>Departure</strong></td><td>จุดหลังจากหยิบ/วางเสร็จ ให้หุ่นยนต์ถอยออกมาก่อนเคลื่อนที่ไปจุดถัดไป</td></tr>
+<tr><td><strong>Via Point</strong></td><td>จุดผ่านระหว่างทาง ใช้บังคับเส้นทางให้อ้อมสิ่งกีดขวาง</td></tr>
+</table>
+
+<div class="tip">
+<strong>Tip:</strong> ใส่ Approach/Departure ให้ทุก Operation ที่มี Fixture หรืออุปกรณ์อยู่ใกล้ตำแหน่งหยิบ-วาง แม้ Reach test
+จะผ่านก็ตาม เพราะเส้นทางตรงอาจตัดผ่านตัว Fixture ได้ในบางมุมของหุ่นยนต์
+</div>
+
+<div class="note">
+<strong>คำถามฝึกคิด:</strong> เปลี่ยน Gripper ตัวใหม่ที่ยาวกว่าเดิม 5 ซม. แล้วหุ่นยนต์ไปหยิบชิ้นงานพลาดตำแหน่งทุกจุด เกิดจากอะไร?
+</div>
+<div class="tip"><strong>เฉลย:</strong> ลืมปรับค่า ExtTcp ให้ตรงกับความยาว Gripper ใหม่ — Pose เดิมที่ Teach ไว้อ้างอิงจาก TCP
+ของ Gripper ตัวเก่า พอเปลี่ยน Tool ต้องปรับ ExtTcp ก่อน ไม่ใช่ไป Teach ใหม่ทุกจุด</div>
+
+        <div class="page-nav">
+          <a href="01.html">← ก่อนหน้า: 1. Resource ขั้นกลาง</a>
+          <a href="03.html">ถัดไป: 3. Weld Point และ Weld Line Operation →</a>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        Process Simulate Tutorial — เอกสารประกอบการเรียนรู้ภายในทีม
+      </footer>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="inner">
+      <nav id="menu">
+        <header class="major"><h2>เมนู</h2></header>
+        <ul>
+          <li><a href="../index.html">หน้าแรก</a></li>
+          <li class="has-children">
+            <a href="../basic/index.html">Basic — พื้นฐาน</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู basic">▾</button>
+            <ul class="submenu">
+              <li><a href="../basic/01.html">1. Process Simulate คืออะไร</a></li>
+              <li><a href="../basic/02.html">2. หน้าตาโปรแกรม</a></li>
+              <li><a href="../basic/03.html">3. Object พื้นฐาน 6 ตัว</a></li>
+              <li><a href="../basic/04.html">4. สร้างงานแรก: Pick and Place</a></li>
+              <li><a href="../basic/05.html">5. รันและอ่านผลลัพธ์เบื้องต้น</a></li>
+              <li><a href="../basic/06.html">6. บันทึกและจัดการไฟล์ Study</a></li>
+            </ul>
+          </li>
+          <li class="has-children expanded">
+            <a href="index.html">Intermediate — ขั้นกลาง</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู intermediate">▾</button>
+            <ul class="submenu">
+              <li><a href="01.html">1. Resource ขั้นกลาง</a></li>
+              <li class="active"><a href="02.html">2. Path และ Location ขั้นสูง</a></li>
+              <li><a href="03.html">3. Weld Point และ Weld Line Operation</a></li>
+              <li><a href="04.html">4. Sequence Editor และ PERT chart ขั้นกลาง</a></li>
+              <li><a href="05.html">5. Collision Set และการตรวจสอบการชนขั้นสูง</a></li>
+              <li><a href="06.html">6. Resource Library และการนำกลับมาใช้ซ้ำ</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../advanced/index.html">Advanced — ขั้นสูง</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู advanced">▾</button>
+            <ul class="submenu">
+              <li><a href="../advanced/01.html">1. Logic Block และ Signal พื้นฐาน</a></li>
+              <li><a href="../advanced/02.html">2. .NET API พื้นฐาน</a></li>
+              <li><a href="../advanced/03.html">3. .NET API ขั้นสูง: ไล่อ่าน Study อัตโนมัติ</a></li>
+              <li><a href="../advanced/04.html">4. Offline Programming (OLP)</a></li>
+              <li><a href="../advanced/05.html">5. Human Simulation เบื้องต้น</a></li>
+              <li><a href="../advanced/06.html">6. Multi-Robot Cell และ Interlock</a></li>
+              <li><a href="../advanced/07.html">7. Study Manager และการจัดการเวอร์ชันไฟล์</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../object-reference/index.html">Object Reference — สาธิต Object</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู object-reference">▾</button>
+            <ul class="submenu">
+              <li><a href="../object-reference/01.html">1. Resource Objects</a></li>
+              <li><a href="../object-reference/02.html">2. Operation Objects</a></li>
+              <li><a href="../object-reference/03.html">3. Logic &amp; Analysis Objects</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../case-study/index.html">Case Study — ตัวอย่างอุตสาหกรรม</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู case-study">▾</button>
+            <ul class="submenu">
+              <li><a href="../case-study/01.html">1. อุตสาหกรรมยานยนต์ (Body-in-White Welding)</a></li>
+              <li><a href="../case-study/02.html">2. งานหยิบจับและบรรจุภัณฑ์ (Material Handling)</a></li>
+              <li><a href="../case-study/03.html">3. งานพ่นสี (Paint Shop Simulation)</a></li>
+              <li><a href="../case-study/04.html">4. อิเล็กทรอนิกส์ (Precision Pick and Place)</a></li>
+            </ul>
+          </li>
+          <li class="has-children">
+            <a href="../tips-tricks/index.html">Tips and Tricks — เทคนิคการทำงาน</a>
+            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู tips-tricks">▾</button>
+            <ul class="submenu">
+              <li><a href="../tips-tricks/01.html">1. UI และ Workflow</a></li>
+              <li><a href="../tips-tricks/02.html">2. การสร้างโมเดลและดีบัก</a></li>
+              <li><a href="../tips-tricks/03.html">3. ประสิทธิภาพการรัน (Performance)</a></li>
+              <li><a href="../tips-tricks/04.html">4. .NET API และ Logic Scripting</a></li>
+            </ul>
+          </li>
+          <li><a href="../examples.html">Example File</a></li>
+        </ul>
+      </nav>
+      <footer id="footer"><p class="copyright">Process Simulate Tutorial — เอกสารประกอบการเรียนรู้ภายในทีม</p></footer>
+    </div>
+  </div>
+  <div id="sidebar-overlay"></div>
+</div>
+<script src="../assets/main.js"></script>
+</body>
+</html>

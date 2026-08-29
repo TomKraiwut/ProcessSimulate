@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+
+# Source training manuals -- copyrighted vendor material, never publish
+/_No_Upload/
