@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04. Robot and Gripper — Process Simulate Tutorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css?v=72b73deb">
+</head>
+<body>
+<div id="wrapper">
+  <div id="main">
+    <div class="inner">
+      <header id="header">
+        <a href="../index.html" class="logo"><span>Process Simulate Tutorial</span></a>
+        <button class="menu-toggle" aria-label="เปิดเมนู" aria-expanded="false">☰</button>
+      </header>
+
+      <main>
+        <h1>04. Robot and Gripper</h1>
+
+        <div class="objectives">
+          <p>วัตถุประสงค์การเรียนรู้</p>
+          <ol>
+          <li>สร้างกลไกของ CNC และ Gripper ด้วย Kinematics Editor, Joint Dependency และ Pose (OPEN / CLOSE)</li>
+          <li>ใส่หุ่น HP20D ด้วย Insert Component, Placement แล้วติด Gripper ด้วย Mount Tool</li>
+          <li>สร้างงานโหลดเข้า-ออก: Compound, Object Flow, Device Operation, Generic Robotic Operation และ Pick and Place</li>
+          <li>ดูและแก้ Motion Type / Speed / OLP Commands ใน Path Editor และ Teach Pendant</li>
+          <li>สร้าง Collision Set ตั้ง Collision Options แล้วเล่นทั้งชุด (36.27 วินาที ไม่ชน)</li>
+          </ol>
+        </div>
+
+<p class="lead" style="max-width:46em;">เซลล์ที่มีเครื่อง <strong>CNC</strong>, <strong>Gripper</strong> และหุ่น <strong>HP20D</strong> — ทำทีละขั้น รวม 29 ขั้น ตั้งแต่สร้างกลไก ใส่หุ่นและติด Gripper สั่งหุ่นหยิบชิ้นงานเข้า-ออกเครื่อง CNC ไปจนถึงตรวจชน</p>
+
+<h2>ภาพรวม: 9 หัวข้อจากกลไกถึงตรวจชน</h2>
+<table>
+<tr><th>ลำดับ</th><th>หัวข้อ</th><th>ทำอะไร</th></tr>
+<tr><td>01</td><td>Kinematics</td><td>link + joint ให้ CNC และ Gripper</td></tr>
+<tr><td>02</td><td>Pose</td><td>OPEN / CLOSE ของประตูและปากจับ</td></tr>
+<tr><td>03</td><td>ใส่หุ่น + Mount Tool</td><td>HP20D ที่ X 1000 Rz 180 ติด Gripper</td></tr>
+<tr><td>04</td><td>Object Flow / Device Op</td><td>Bank วิ่งบนสายพาน ประตูปิด-เปิด</td></tr>
+<tr><td>05</td><td>Link</td><td>เรียงลำดับใน Sequence Editor</td></tr>
+<tr><td>06</td><td>Robotic Operation</td><td>RB_Load_In 9 จุด + Grip / Release</td></tr>
+<tr><td>07</td><td>Pick and Place</td><td>RB_Load_Out จาก CNC ไป Work_Table</td></tr>
+<tr><td>08</td><td>Path Editor</td><td>PTP / LIN, Speed, OLP Commands</td></tr>
+<tr><td>09</td><td>Collision</td><td>Collision Set + Collision Mode</td></tr>
+</table>
+<div class="tip">
+<strong>สิ่งที่ต้องมี:</strong> Process Simulate 2502 · โฟลเดอร์ <code>04_ROBOT_AND_GRIPPER</code> · <code>Library\</code> (.cojt 7 ชิ้น) · <code>1_</code> ถึง <code>7_</code> <code>.psz</code>
+</div>
+<h2>Workflow: 6 ช่วง</h2>
+<table>
+<tr><th>ช่วง</th><th>งาน</th><th>ทำอะไร</th><th>ไฟล์</th></tr>
+<tr><td>01</td><td>กลไก</td><td>Kinematics Editor, Joint Dependency, Pose Editor</td><td>1_CNC_and_Gripper</td></tr>
+<tr><td>02</td><td>Robot</td><td>Insert Component, Placement, Mount Tool</td><td>2_Insert_Robot</td></tr>
+<tr><td>03</td><td>Flow</td><td>Compound, Object Flow, Device Op, Link</td><td>3_Object_Flow</td></tr>
+<tr><td>04</td><td>หยิบเข้า</td><td>Generic Robotic Op, Path Editor, OLP</td><td>4_Robot_Load_In</td></tr>
+<tr><td>05</td><td>หยิบออก</td><td>Pick and Place, Start / End, Link</td><td>5_Robot_Load_Out</td></tr>
+<tr><td>06</td><td>ตรวจชน</td><td>Collision Set, Options, Collision Mode</td><td>6_Collision_Check</td></tr>
+</table>
+
+<p class="lead" style="max-width:46em;">เซลล์ที่มีเครื่อง <strong>CNC</strong>, <strong>Gripper</strong> และหุ่น <strong>HP20D</strong> — ทำทีละขั้น รวม 29 ขั้น ตั้งแต่สร้างกลไก ใส่หุ่นและติด Gripper สั่งหุ่นหยิบชิ้นงานเข้า-ออกเครื่อง CNC ไปจนถึงตรวจชน</p>
+
+<h2>ภาพรวม: 9 หัวข้อจากกลไกถึงตรวจชน</h2>
+<table>
+<tr><th>ลำดับ</th><th>หัวข้อ</th><th>ทำอะไร</th></tr>
+<tr><td>01</td><td>Kinematics</td><td>link + joint ให้ CNC และ Gripper</td></tr>
+<tr><td>02</td><td>Pose</td><td>OPEN / CLOSE ของประตูและปากจับ</td></tr>
+<tr><td>03</td><td>ใส่หุ่น + Mount Tool</td><td>HP20D ที่ X 1000 Rz 180 ติด Gripper</td></tr>
+<tr><td>04</td><td>Object Flow / Device Op</td><td>Bank วิ่งบนสายพาน ประตูปิด-เปิด</td></tr>
+<tr><td>05</td><td>Link</td><td>เรียงลำดับใน Sequence Editor</td></tr>
+<tr><td>06</td><td>Robotic Operation</td><td>RB_Load_In 9 จุด + Grip / Release</td></tr>
+<tr><td>07</td><td>Pick and Place</td><td>RB_Load_Out จาก CNC ไป Work_Table</td></tr>
+<tr><td>08</td><td>Path Editor</td><td>PTP / LIN, Speed, OLP Commands</td></tr>
+<tr><td>09</td><td>Collision</td><td>Collision Set + Collision Mode</td></tr>
+</table>
+<div class="tip">
+<strong>สิ่งที่ต้องมี:</strong> Process Simulate · โฟลเดอร์ <code>04_ROBOT_AND_GRIPPER</code> · <code>Library\</code> (.cojt 7 ชิ้น) · <code>1_</code> ถึง <code>7_</code> <code>.psz</code>
+</div>
+<h2>Workflow: 6 ช่วง</h2>
+<table>
+<tr><th>ช่วง</th><th>งาน</th><th>ทำอะไร</th><th>ไฟล์</th></tr>
+<tr><td>01</td><td>กลไก</td><td>Kinematics Editor, Joint Dependency, Pose Editor</td><td>1_CNC_and_Gripper</td></tr>
+<tr><td>02</td><td>Robot</td><td>Insert Component, Placement, Mount Tool</td><td>2_Insert_Robot</td></tr>
+<tr><td>03</td><td>Flow</td><td>Compound, Object Flow, Device Op, Link</td><td>3_Object_Flow</td></tr>
+<tr><td>04</td><td>หยิบเข้า</td><td>Generic Robotic Op, Path Editor, OLP</td><td>4_Robot_Load_In</td></tr>
+<tr><td>05</td><td>หยิบออก</td><td>Pick and Place, Start / End, Link</td><td>5_Robot_Load_Out</td></tr>
+<tr><td>06</td><td>ตรวจชน</td><td>Collision Set, Options, Collision Mode</td><td>6_Collision_Check</td></tr>
+</table>
+
+<h2>ขั้นที่ 1: ตั้ง System Root แล้วเปิด 1_CNC_and_Gripper</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-01.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-01.jpg" alt="ขั้นที่ 1: ตั้ง System Root แล้วเปิด 1_CNC_and_Gripper" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">File</span></li>
+    <li><span class="num">2</span><span class="text">Disconnected Study</span></li>
+    <li><span class="num">3</span><span class="text">Open in Standard Mode</span></li>
+    <li><span class="num">4</span><span class="text">เลือก 1_CNC_and_Gripper</span></li>
+    <li><span class="num">5</span><span class="text">Open</span></li>
+    <li><span class="num">6</span><span class="text">System Root บนหน้า Welcome ต้องเป็น ...\04_ROBOT_AND_GRIPPER\Library</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 2: ไฟล์ 1 ยังไม่มีกลไก Pose Editor จึงเป็นสีเทา</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-02.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-02.jpg" alt="ขั้นที่ 2: ไฟล์ 1 ยังไม่มีกลไก Pose Editor จึงเป็นสีเทา" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">mGripper และ mCNC ใน Resources (ไฟล์ 1)</span></li>
+    <li><span class="num">2</span><span class="text">Kinematics Editor กดได้</span></li>
+    <li><span class="num">3</span><span class="text">Pose Editor สีเทา = ยังไม่มี joint ให้ตั้งท่า</span></li>
+    <li><span class="num">4</span><span class="text">เป้าหมาย (ไฟล์ 2): lnk1</span></li>
+    <li><span class="num">5</span><span class="text">lnk2 ต่อด้วย joint j1</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 3: Set Modeling Scope ที่ mCNC แล้วดูชิ้นส่วนข้างใน</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-03.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-03.jpg" alt="ขั้นที่ 3: Set Modeling Scope ที่ mCNC แล้วดูชิ้นส่วนข้างใน" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก mCNC &gt; Set Modeling Scope</span></li>
+    <li><span class="num">2</span><span class="text">ช่อง Scope = mCNC</span></li>
+    <li><span class="num">3</span><span class="text">CNC ตัวเครื่อง</span></li>
+    <li><span class="num">4</span><span class="text">DoorL ประตูซ้าย</span></li>
+    <li><span class="num">5</span><span class="text">DoorR ประตูขวา</span></li>
+    <li><span class="num">6</span><span class="text">คลิก DoorL ใน tree ชิ้นนั้นจะสว่างในหน้าจอ 3D</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ข้อควรจำ:</strong> Modeling Scope เปิดชิ้นส่วนให้แก้ไขได้ทีละชิ้น ต้องอยู่ใน Scope ก่อน Kinematics Editor ถึงจะสร้าง link ได้</div>
+
+<h2>ขั้นที่ 4: Kinematics Editor &gt; Create Link ทั้ง 3 link</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-04.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-04.jpg" alt="ขั้นที่ 4: Kinematics Editor &gt; Create Link ทั้ง 3 link" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Create Link (ปุ่มแรกในหน้าต่าง)</span></li>
+    <li><span class="num">2</span><span class="text">Name = lnk1 (ขึ้นเอง)</span></li>
+    <li><span class="num">3</span><span class="text">แถวสีเขียว Link Elements แล้วคลิก CNC ใน tree</span></li>
+    <li><span class="num">4</span><span class="text">OK</span></li>
+    <li><span class="num">5</span><span class="text">lnk1 = CNC</span></li>
+    <li><span class="num">6</span><span class="text">lnk2 = DoorL</span></li>
+    <li><span class="num">7</span><span class="text">lnk3 = DoorR</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>ทำซ้ำ:</strong> กด Create Link อีก 2 ครั้ง ครั้งที่ 2 คลิก DoorL ครั้งที่ 3 คลิก DoorR สี link ในกราฟตรงกับสีในหน้าจอ 3D</div>
+
+<h2>ขั้นที่ 5: ลาก lnk1 ไป lnk2 สร้าง j1 แบบ Prismatic แกน -Y</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-05.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-05.jpg" alt="ขั้นที่ 5: ลาก lnk1 ไป lnk2 สร้าง j1 แบบ Prismatic แกน -Y" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">กดค้างที่ lnk1 ลากไปปล่อยที่ lnk2 ได้ joint j1</span></li>
+    <li><span class="num">2</span><span class="text">แกน From 0,0,0 To 0, -100, 0 (ทิศ -Y)</span></li>
+    <li><span class="num">3</span><span class="text">Joint type = Prismatic (เลื่อน)</span></li>
+    <li><span class="num">4</span><span class="text">Limits = No limits</span></li>
+    <li><span class="num">5</span><span class="text">OK</span></li>
+    <li><span class="num">6</span><span class="text">j1 lnk1 &gt; lnk2</span></li>
+    <li><span class="num">7</span><span class="text">j2 lnk1 &gt; lnk3 แกน To 0, 100, 0 (ทิศ+Y)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 6: Joint Dependency ให้ j2 ขยับตาม j1</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-06.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-06.jpg" alt="ขั้นที่ 6: Joint Dependency ให้ j2 ขยับตาม j1" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือกเส้น j2 ในกราฟ &gt; ปุ่ม Joint Dependency &gt; เลือก Joint Function</span></li>
+    <li><span class="num">2</span><span class="text">ลูกศรข้าง Joint Name &gt; คลิก j1</span></li>
+    <li><span class="num">3</span><span class="text">คลิกปุ่ม j1 เพื่อใส่ลงสูตร</span></li>
+    <li><span class="num">4</span><span class="text">สูตรขึ้นเป็น (D(j1)) = ระยะเลื่อนของ j1</span></li>
+    <li><span class="num">5</span><span class="text">Apply แล้ว Close</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 7: Pose Editor ของ CNC: OPEN j1 = 400, CLOSE j1 = 0</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-07.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-07.jpg" alt="ขั้นที่ 7: Pose Editor ของ CNC: OPEN j1 = 400, CLOSE j1 = 0" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Pose Editor &gt; New... &gt; พิมพ์ 400 แล้วกด Tab</span></li>
+    <li><span class="num">2</span><span class="text">Pose name ลบชื่อเดิมแล้วพิมพ์ OPEN</span></li>
+    <li><span class="num">3</span><span class="text">OK</span></li>
+    <li><span class="num">4</span><span class="text">OPEN</span></li>
+    <li><span class="num">5</span><span class="text">CLOSE = 0 (ทำซ้ำข้อ 1-3)</span></li>
+    <li><span class="num">6</span><span class="text">Jump ทดสอบทีละท่า</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 8: Gripper: link 2 ตัวและ j1 แบบ Prismatic แกน -X</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-08.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-08.jpg" alt="ขั้นที่ 8: Gripper: link 2 ตัวและ j1 แบบ Prismatic แกน -X" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Gripper_Clamp</span></li>
+    <li><span class="num">2</span><span class="text">Gripper_Base</span></li>
+    <li><span class="num">3</span><span class="text">lnk1 = Gripper_Base</span></li>
+    <li><span class="num">4</span><span class="text">lnk2 = Gripper_Clamp</span></li>
+    <li><span class="num">5</span><span class="text">To -100, 0, 0 (ทิศ -X)</span></li>
+    <li><span class="num">6</span><span class="text">Prismatic แล้ว OK</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 9: Pose ของ Gripper: OPEN j1 = 20, CLOSE j1 = 0</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-09.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-09.jpg" alt="ขั้นที่ 9: Pose ของ Gripper: OPEN j1 = 20, CLOSE j1 = 0" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">New... &gt; 20 แล้ว Tab</span></li>
+    <li><span class="num">2</span><span class="text">ชื่อ OPEN &gt; OK</span></li>
+    <li><span class="num">3</span><span class="text">OPEN</span></li>
+    <li><span class="num">4</span><span class="text">CLOSE = 0</span></li>
+    <li><span class="num">5</span><span class="text">Jump OPEN: Clamp เลื่อนออก 20 mm</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 10: End Modeling และการไม่บันทึกทับ (อธิบาย)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-10.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-10.jpg" alt="ขั้นที่ 10: End Modeling และการไม่บันทึกทับ (อธิบาย)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">End Modeling = ปิดโหมดแก้ไขของชิ้นที่อยู่ใน Scope</span></li>
+    <li><span class="num">2</span><span class="text">ช่อง Scope บอกว่ากำลังแก้ชิ้นไหน</span></li>
+    <li><span class="num">3</span><span class="text">เปิดไฟล์ถัดไป PS ถามว่าจะ Save ไหม: ตอบ No ไฟล์สอนไม่เปลี่ยน</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>บทถัดไป:</strong> เปิด 2_Insert_Robot_and_Layout ซึ่งมี CNC และ Gripper ที่มีกลไกและ Pose ครบ แล้วทุกคนเริ่มบท 2 จากจุดเดียวกัน</div>
+
+<h2>ขั้นที่ 11: Insert Component ใส่หุ่น HP20D จาก Library</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-11.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-11.jpg" alt="ขั้นที่ 11: Insert Component ใส่หุ่น HP20D จาก Library" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Modeling &gt; Insert Component ไปที่ Library</span></li>
+    <li><span class="num">2</span><span class="text">HP20D.cojt</span></li>
+    <li><span class="num">3</span><span class="text">Preview เป็นหุ่นยนต์</span></li>
+    <li><span class="num">4</span><span class="text">Open</span></li>
+    <li><span class="num">5</span><span class="text">HP20D ขึ้นใน Resources (วางที่จุด 0)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 12: Placement วาง HP20D ที่ X 1000 หมุน Rz 180</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-12.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-12.jpg" alt="ขั้นที่ 12: Placement วาง HP20D ที่ X 1000 หมุน Rz 180" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก HP20D &gt; Placement Manipulator กดลูกศรขยาย</span></li>
+    <li><span class="num">2</span><span class="text">พิมพ์ Rz = 180 ก่อน</span></li>
+    <li><span class="num">3</span><span class="text">แล้ว X = 1000</span></li>
+    <li><span class="num">4</span><span class="text">Close</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 13: Mount Tool ติด Gripper ที่ปลายแขน HP20D</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-13.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-13.jpg" alt="ขั้นที่ 13: Mount Tool ติด Gripper ที่ปลายแขน HP20D" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก HP20D &gt; Robot &gt; Mount Tool แล้วคลิก Gripper ใน tree</span></li>
+    <li><span class="num">2</span><span class="text">Frame ของ Gripper = Base Frame (ขึ้นเอง)</span></li>
+    <li><span class="num">3</span><span class="text">Mount on = HP20D</span></li>
+    <li><span class="num">4</span><span class="text">Frame = TOOLFRAME</span></li>
+    <li><span class="num">5</span><span class="text">Apply แล้ว Close</span></li>
+    <li><span class="num">6</span><span class="text">Gripper ย้ายไปติดหน้าแปลนหุ่น ขยับตามแขน</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 14: New Compound Operation (CompOp)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-14.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-14.jpg" alt="ขั้นที่ 14: New Compound Operation (CompOp)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">แท็บ Operation ลูกศรใต้ New Operation</span></li>
+    <li><span class="num">2</span><span class="text">New Compound Operation</span></li>
+    <li><span class="num">3</span><span class="text">Name = CompOp</span></li>
+    <li><span class="num">4</span><span class="text">Scope = Operation Root</span></li>
+    <li><span class="num">5</span><span class="text">OK</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ข้อควรจำ:</strong> เมนู New Operation รวมทุกชนิด: Object Flow, Device, Pick and Place, Generic Robotic ใช้ซ้ำในบท 4-5 ไฟล์ 4-7 ชื่อ compound ว่า Operation = กล่องเดียวกับ CompOp</div>
+
+<h2>ขั้นที่ 15: New Object Flow Operation ให้ Bank (Bank_In)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-15.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-15.jpg" alt="ขั้นที่ 15: New Object Flow Operation ให้ Bank (Bank_In)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Name = Bank_In</span></li>
+    <li><span class="num">2</span><span class="text">Object = Bank (เลือก Bank ก่อนเปิดคำสั่ง)</span></li>
+    <li><span class="num">3</span><span class="text">Start Point = ตำแหน่งปัจจุบัน</span></li>
+    <li><span class="num">4</span><span class="text">End Point คลิกช่องเขียวแล้วคลิกปลายสายพาน</span></li>
+    <li><span class="num">5</span><span class="text">Duration = 5</span></li>
+    <li><span class="num">6</span><span class="text">OK</span></li>
+    <li><span class="num">7</span><span class="text">ต้นสายพาน loc1 (600, 2559.8, 830)</span></li>
+    <li><span class="num">8</span><span class="text">ปลายสายพาน loc (600, 759.8, 830)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 16: New Device Operation ประตู CNC (CNC_CLOSE / CNC_OPEN)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-16.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-16.jpg" alt="ขั้นที่ 16: New Device Operation ประตู CNC (CNC_CLOSE / CNC_OPEN)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Name = CNC_CLOSE</span></li>
+    <li><span class="num">2</span><span class="text">Device = CNC (เลือกก่อนเปิดคำสั่ง)</span></li>
+    <li><span class="num">3</span><span class="text">From pose = OPEN</span></li>
+    <li><span class="num">4</span><span class="text">To pose = CLOSE</span></li>
+    <li><span class="num">5</span><span class="text">Duration = 3</span></li>
+    <li><span class="num">6</span><span class="text">OK</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>ทำซ้ำ:</strong> CNC_OPEN: From CLOSE &gt; To OPEN 3 วินาที CNC จะเป็นสีฟ้าตอนถูกเลือก ค่าเริ่มต้นของ Duration คือ 5 ต้องแก้เป็น 3</div>
+
+<h2>ขั้นที่ 17: Set Current Operation, Link แล้วเล่นได้ 11 วินาที</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-17.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-17.jpg" alt="ขั้นที่ 17: Set Current Operation, Link แล้วเล่นได้ 11 วินาที" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">ก่อน: Bank_In เริ่มพร้อม CNC_CLOSE (ยังไม่ Link)</span></li>
+    <li><span class="num">2</span><span class="text">หลัง: Bank_In 0-5 &gt; CLOSE 5-8 &gt; OPEN 8-11</span></li>
+    <li><span class="num">3</span><span class="text">คลิกขวา CompOp &gt; Set Current Operation</span></li>
+    <li><span class="num">4</span><span class="text">เลือก Bank_In แล้ว Ctrl+คลิก CNC_CLOSE &gt; ปุ่ม Link</span></li>
+    <li><span class="num">5</span><span class="text">เล่นจบ 11.00 วินาที</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 18: New Generic Robotic Operation (RB_Load_In)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-18.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-18.jpg" alt="ขั้นที่ 18: New Generic Robotic Operation (RB_Load_In)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Robot = HP20D (เลือกหุ่นก่อน)</span></li>
+    <li><span class="num">2</span><span class="text">Tool = Gripper (ขึ้นเอง)</span></li>
+    <li><span class="num">3</span><span class="text">Scope = CompOp</span></li>
+    <li><span class="num">4</span><span class="text">OK</span></li>
+    <li><span class="num">5</span><span class="text">1 Name = RB_Load_In</span></li>
+    <li><span class="num">6</span><span class="text">ไฟล์ 4: 9 จุด Start &gt; BeforePick &gt; Pick &gt; AfterPick &gt; via &gt; BeforePlace &gt; Place &gt; AfterPlace &gt; End</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 19: เพิ่มจุดแล้ว Manipulate Location ยก Z +100</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-19.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-19.jpg" alt="ขั้นที่ 19: เพิ่มจุดแล้ว Manipulate Location ยก Z +100" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Add Location Before เพิ่มจุดก่อนจุดที่เลือก</span></li>
+    <li><span class="num">2</span><span class="text">Add Location After</span></li>
+    <li><span class="num">3</span><span class="text">Add Current Location = ท่าหุ่นตอนนี้ (Start / End ท่า Home)</span></li>
+    <li><span class="num">4</span><span class="text">Add Location By Pick คลิกจุดในหน้าจอ 3D (Pick / Place)</span></li>
+    <li><span class="num">5</span><span class="text">Manipulate Location เลื่อนจุดที่เลือก</span></li>
+    <li><span class="num">6</span><span class="text">แกน Z</span></li>
+    <li><span class="num">7</span><span class="text">พิมพ์ 100</span></li>
+    <li><span class="num">8</span><span class="text">Close</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 20: Path Editor ดู Motion Type, Speed, OLP ของ RB_Load_In</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-20.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-20.jpg" alt="ขั้นที่ 20: Path Editor ดู Motion Type, Speed, OLP ของ RB_Load_In" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก RB_Load_In &gt; แท็บ Path Editor &gt; Add Operations to Editor</span></li>
+    <li><span class="num">2</span><span class="text">ระยะเวลารวม 9.75 วินาที</span></li>
+    <li><span class="num">3</span><span class="text">PTP 100 % = Start, BeforePick, via, BeforePlace, End</span></li>
+    <li><span class="num">4</span><span class="text">LIN 500 mm/s = Pick, AfterPick, Place, AfterPlace</span></li>
+    <li><span class="num">5</span><span class="text">OLP Commands ที่ Pick / Place (5 คำสั่ง)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 21: Teach Pendant ดู OLP Commands ที่ Pick (Grip)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-21.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-21.jpg" alt="ขั้นที่ 21: Teach Pendant ดู OLP Commands ที่ Pick (Grip)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">LIN / 500 mm/s / zone fine</span></li>
+    <li><span class="num">2</span><span class="text">OLP ที่ Pick: Drive CLOSE &gt; WaitDevice CLOSE &gt; Grip</span></li>
+    <li><span class="num">3</span><span class="text">Add &gt; Standard Commands เพิ่มคำสั่ง</span></li>
+    <li><span class="num">4</span><span class="text">Part Handling &gt; Grip จับชิ้นงาน</span></li>
+    <li><span class="num">5</span><span class="text">Release ปล่อย (ใช้ที่ Place)</span></li>
+    <li><span class="num">6</span><span class="text">Tool Handling &gt; DriveDevice สั่ง Gripper ไป Pose</span></li>
+    <li><span class="num">7</span><span class="text">WaitDevice รอจนถึง Pose</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 22: เล่นทั้ง compound: หยิบเข้า CNC แล้วรอ 5 วินาที</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-22.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-22.jpg" alt="ขั้นที่ 22: เล่นทั้ง compound: หยิบเข้า CNC แล้วรอ 5 วินาที" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Bank_In 0-5</span></li>
+    <li><span class="num">2</span><span class="text">RB_Load_In ต่อจาก Bank_In</span></li>
+    <li><span class="num">3</span><span class="text">CNC_CLOSE 3 วินาที</span></li>
+    <li><span class="num">4</span><span class="text">เส้น Link ยาว = รอ 5 วินาทีก่อน CNC_OPEN (เวลาเครื่องทำงาน)</span></li>
+    <li><span class="num">5</span><span class="text">หุ่นหยิบ Bank บนสายพาน</span></li>
+    <li><span class="num">6</span><span class="text">หุ่นวาง Bank ใน CNC</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 23: New Pick and Place Operation (RB_Load_Out)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-23.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-23.jpg" alt="ขั้นที่ 23: New Pick and Place Operation (RB_Load_Out)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Name = RB_Load_Out</span></li>
+    <li><span class="num">2</span><span class="text">Robot = HP20D (เลือกหุ่นก่อน)</span></li>
+    <li><span class="num">3</span><span class="text">Gripper</span></li>
+    <li><span class="num">4</span><span class="text">Scope = compound (คลิกในต้นไม้ Operations)</span></li>
+    <li><span class="num">5</span><span class="text">ท่าหยิบ CLOSE</span></li>
+    <li><span class="num">6</span><span class="text">ท่าวาง OPEN</span></li>
+    <li><span class="num">7</span><span class="text">Pick จุดหยิบ</span></li>
+    <li><span class="num">8</span><span class="text">Place จุดวาง</span></li>
+    <li><span class="num">9</span><span class="text">ลูกศรข้างช่อง</span></li>
+    <li><span class="num">10</span><span class="text">Frame by 6 values</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 24: พิมพ์จุด Pick / Place แล้วกด OK</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-24.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-24.jpg" alt="ขั้นที่ 24: พิมพ์จุด Pick / Place แล้วกด OK" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Pick: X -449.8 Y -0.2</span></li>
+    <li><span class="num">2</span><span class="text">Z 810 มุมหมุน 0</span></li>
+    <li><span class="num">3</span><span class="text">OK</span></li>
+    <li><span class="num">4</span><span class="text">Place: พิมพ์ Rz 90 ก่อน</span></li>
+    <li><span class="num">5</span><span class="text">แล้ว 600, -900, 860</span></li>
+    <li><span class="num">6</span><span class="text">OK</span></li>
+    <li><span class="num">7</span><span class="text">RB_Load_Out</span></li>
+    <li><span class="num">8</span><span class="text">Scope = Operation</span></li>
+    <li><span class="num">9</span><span class="text">OK (ทดสอบแล้ว PS ไม่ปิดตัว)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 25: เพิ่ม Start / End ที่ท่า Home แล้วเรียงจุด</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-25.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-25.jpg" alt="ขั้นที่ 25: เพิ่ม Start / End ที่ท่า Home แล้วเรียงจุด" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">OK ได้ RB_Load_Out มี pick และ place ให้อัตโนมัติ</span></li>
+    <li><span class="num">2</span><span class="text">เลือก HP20D &gt; Robot &gt; Home แล้วเลือกจุดสุดท้าย &gt; Add Current Location 2 ครั้ง ตั้งชื่อ F2 = End / Start</span></li>
+    <li><span class="num">3</span><span class="text">Path Editor: เลือก Start</span></li>
+    <li><span class="num">4</span><span class="text">Move Up จน Start อยู่บนสุด</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ระวัง:</strong> Add Location Before จะคัดลอกจุดที่เลือก (ไม่ใช่ท่า Home) และเปิด Robot Jog ให้เลื่อนเอง ถ้าจะได้ท่า Home ให้ใช้ Add Current Location แล้วเลื่อนลำดับใน Path Editor</div>
+
+<h2>ขั้นที่ 26: Link ต่อจาก CNC_OPEN แล้วเล่น: Bank ไปวางบนโต๊ะ</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-26.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-26.jpg" alt="ขั้นที่ 26: Link ต่อจาก CNC_OPEN แล้วเล่น: Bank ไปวางบนโต๊ะ" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">CNC_OPEN เลือกก่อน</span></li>
+    <li><span class="num">2</span><span class="text">Ctrl+คลิก RB_Load_Out &gt; Link</span></li>
+    <li><span class="num">3</span><span class="text">จบ 33.73 วินาที</span></li>
+    <li><span class="num">4</span><span class="text">หุ่นหยิบ Bank ใน CNC</span></li>
+    <li><span class="num">5</span><span class="text">Bank วางบน Work_Table</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 27: Collision Viewer &gt; Edit Collision Set</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-27.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-27.jpg" alt="ขั้นที่ 27: Collision Viewer &gt; Edit Collision Set" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">New Collision Set</span></li>
+    <li><span class="num">2</span><span class="text">Edit Collision Set</span></li>
+    <li><span class="num">3</span><span class="text">new_collision_set</span></li>
+    <li><span class="num">4</span><span class="text">แท็บ Collision Viewer</span></li>
+    <li><span class="num">5</span><span class="text">Check: HP20D, Gripper</span></li>
+    <li><span class="num">6</span><span class="text">With: CNC</span></li>
+    <li><span class="num">7</span><span class="text">OK</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 28: Collision Options และ Collision Mode</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-28.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-28.jpg" alt="ขั้นที่ 28: Collision Options และ Collision Mode" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">ปุ่ม Collision Options ใน Collision Viewer &gt; หน้า Collision</span></li>
+    <li><span class="num">2</span><span class="text">Check for Collision Near-Miss + ระยะ (mm) เตือนก่อนชน</span></li>
+    <li><span class="num">3</span><span class="text">Stop Simulation when a Collision is Detected</span></li>
+    <li><span class="num">4</span><span class="text">OK</span></li>
+    <li><span class="num">5</span><span class="text">แท็บ Home &gt; Collision Mode (สีฟ้า = เปิด)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 29: เล่นทั้งชุด 36.27 วินาที ผล: ไม่ชน</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/04-29.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/04-29.jpg" alt="ขั้นที่ 29: เล่นทั้งชุด 36.27 วินาที ผล: ไม่ชน" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">No pairs to display = ไม่มีคู่ที่ชน</span></li>
+    <li><span class="num">2</span><span class="text">หุ่นเข้า-ออก CNC ไม่เฉียดประตู</span></li>
+    <li><span class="num">3</span><span class="text">จบ 36.27 วินาที</span></li>
+    <li><span class="num">4</span><span class="text">RB_Load_Out 9 จุด 10.52 วินาที (เพิ่ม Before / After / via จากขั้น 19)</span></li>
+  </ol></div>
+</div>
+
+<h2>ไฟล์ในบทเรียนและสิ่งที่อยู่ในแต่ละไฟล์</h2>
+<table>
+<tr><th>ไฟล์ (เปิดตอนเริ่มบท)</th><th>สิ่งที่มี</th><th>เวลา compound</th></tr>
+<tr><td>1_CNC_and_Gripper.psz</td><td>mCNC, mGripper, Bank (ยังไม่มีกลไก)</td><td>-</td></tr>
+<tr><td>2_Insert_Robot_and_Layout.psz</td><td>CNC / Gripper มี Pose + Conveyer, Work_Table, FG</td><td>-</td></tr>
+<tr><td>3_Object_Flow_and_Device_Operation.psz</td><td>+ HP20D, CompOp: Bank_In, CNC_CLOSE, CNC_OPEN</td><td>6.00 (11.00 หลัง Link)</td></tr>
+<tr><td>4_Robot_Load_In.psz</td><td>+ RB_Load_In 9 จุด (compound ชื่อ Operation)</td><td>25.75</td></tr>
+<tr><td>5_Robot_Load_Out.psz</td><td>เหมือนผลบท 4 ยังไม่มี RB_Load_Out (ไฟล์เริ่ม)</td><td>25.75</td></tr>
+<tr><td>6_Collision_Check.psz</td><td>+ RB_Load_Out 9 จุด + new_collision_set</td><td>36.27</td></tr>
+<tr><td>7_Completed_Backup.psz</td><td>เฉลยงานครบเหมือนไฟล์ 6</td><td>36.27</td></tr>
+</table>
+
+<h2>เช็กลิสต์: ผู้เรียนทำได้ครบหรือยัง</h2>
+<table>
+<tr><th>ข้อ</th><th>สิ่งที่ต้องทำได้</th><th>ตรวจด้วย</th></tr>
+<tr><td>1</td><td>สร้าง link / joint แบบ Prismatic + Joint Dependency</td><td>ประตู 2 บานเปิดพร้อมกัน</td></tr>
+<tr><td>2</td><td>สร้าง Pose OPEN / CLOSE แล้ว Jump</td><td>CNC 400 / 0, Gripper 20 / 0</td></tr>
+<tr><td>3</td><td>Insert Component + Placement + Mount Tool</td><td>Gripper ติดปลายแขน HP20D</td></tr>
+<tr><td>4</td><td>Object Flow, Device Operation, Link</td><td>เล่นจบ 11.00 วินาที</td></tr>
+<tr><td>5</td><td>Generic Robotic Op + จุด + OLP Grip / Release</td><td>Bank ไปอยู่ใน CNC</td></tr>
+<tr><td>6</td><td>Pick and Place + Start / End</td><td>Bank ไปอยู่บน Work_Table</td></tr>
+<tr><td>7</td><td>อ่าน Path Editor: PTP / LIN, Speed</td><td>บอกได้ว่าจุดไหนใช้ LIN</td></tr>
+<tr><td>8</td><td>Collision Set + Collision Mode</td><td>No pairs to display</td></tr>
+</table>
+
+<h2>ปัญหาที่พบบ่อยและวิธีแก้</h2>
+<table>
+<tr><th>อาการ</th><th>วิธีแก้</th></tr>
+<tr><td>Pose Editor สีเทา</td><td>ชิ้นนั้นยังไม่มี joint: Set Modeling Scope แล้วสร้าง link / joint ก่อน</td></tr>
+<tr><td>พิมพ์ค่า j1 แล้วกด Enter ได้ท่า pos1</td><td>ใช้ Tab แทน Enter แล้วตั้งชื่อ ถ้าได้ pos1 แล้วใช้ Edit... เปลี่ยนชื่อ</td></tr>
+<tr><td>ชื่อ Pose ต่อท้ายกัน (pos1OPEN)</td><td>ในช่อง Pose name กด End แล้ว Shift+Home, Delete ก่อนพิมพ์</td></tr>
+<tr><td>Joint Dependency สูตรผิด (cos)</td><td>กด C ล้างสูตร เปิดรายการ Joint Name เลือก j1 แล้วกดปุ่ม j1</td></tr>
+<tr><td>เวลาเล่นมากกว่าในไฟล์</td><td>หุ่นไม่ได้อยู่ท่า Home: Robot &gt; Home แล้ว Jump Simulation to Start</td></tr>
+<tr><td>Add Location Before ไม่ได้ท่า Home</td><td>ใช้ Add Current Location แล้ว Move Up ใน Path Editor</td></tr>
+<tr><td>ไดอะล็อก Open มีรายการเด้งทับ</td><td>คลิกชื่อไฟล์ในรายการอีกครั้งแล้วกด Open</td></tr>
+<tr><td>ปิดไฟล์แล้วถาม Save</td><td>No = ไม่เก็บสิ่งที่ลอง ถ้าจะเก็บใช้ Save As ชื่อใหม่</td></tr>
+</table>
+
+        <div class="page-nav">
+          <a href="03.html">← ก่อนหน้า: 03. Basic Process</a>
+          <a href="05.html">ถัดไป: 05. BIW Spot Welding →</a>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        Process Simulate Tutorial
+      </footer>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="inner">
+      <nav id="menu">
+        <header class="major"><button class="sidebar-close" aria-label="ปิดเมนู">✕</button><h2>เมนู</h2></header>
+        <ul>
+          <li><a href="../index.html">หน้าแรก</a></li>
+          <li><a href="../pre-test.html">แบบทดสอบก่อนเรียน</a></li>
+          <li><a href="00.html">00. CAD Import</a></li>
+          <li><a href="01.html">01. Part Assembly</a></li>
+          <li><a href="02.html">02. Kinematics</a></li>
+          <li><a href="03.html">03. Basic Process</a></li>
+          <li class="active"><a href="04.html">04. Robot and Gripper</a></li>
+          <li><a href="05.html">05. BIW Spot Welding</a></li>
+          <li><a href="06.html">06. Robot Painting</a></li>
+          <li><a href="07.html">07. Robot Press Line</a></li>
+          <li><a href="08.html">08. AGV</a></li>
+          <li><a href="09.html">09. Human Basic</a></li>
+          <li><a href="../post-test.html">แบบทดสอบหลังเรียน และ Feedback</a></li>
+        </ul>
+      </nav>
+      <footer id="footer"><p class="copyright">Process Simulate Tutorial</p></footer>
+    </div>
+  </div>
+  <div id="sidebar-overlay"></div>
+</div>
+<script src="../assets/main.js?v=30d529e9"></script>
+</body>
+</html>

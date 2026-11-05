@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02. Kinematics — Process Simulate Tutorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css?v=72b73deb">
+</head>
+<body>
+<div id="wrapper">
+  <div id="main">
+    <div class="inner">
+      <header id="header">
+        <a href="../index.html" class="logo"><span>Process Simulate Tutorial</span></a>
+        <button class="menu-toggle" aria-label="เปิดเมนู" aria-expanded="false">☰</button>
+      </header>
+
+      <main>
+        <h1>02. Kinematics</h1>
+
+        <div class="objectives">
+          <p>วัตถุประสงค์การเรียนรู้</p>
+          <ol>
+          <li>เปิด Device ให้แก้ไขได้ด้วย Set Modeling Scope แล้วสร้าง Link และ Joint ใน Kinematics Editor</li>
+          <li>ตั้ง Pose (HOME, DOWN, UP, PLACE) ด้วย Pose Editor และจบงานด้วย End Modeling</li>
+          <li>สั่ง Device Operation จาก pose ไป pose แล้วต่อ 6 operation ด้วย Link (รวม 32 วินาที)</li>
+          <li>ใช้ Attach / Detach Event ให้ชิ้นงานติดไปกับหัวจับ แล้วอัดวิดีโอและ Export to Web</li>
+          </ol>
+        </div>
+
+<p class="lead" style="max-width:46em;">เปลี่ยนชิ้นส่วนที่นิ่งอยู่ให้เป็นเครื่องที่ขยับได้ — สร้างกลไก <strong>gantry</strong> แกน X / Z ทีละขั้น รวม 17 ขั้น แล้วสั่งให้หยิบ-วางกล่อง ตั้งแต่ Link, Joint, Pose ไปจนถึง Device Operation และ Event</p>
+
+<h2>ภาพรวม: สร้างกลไก gantry แล้วสั่งหยิบ-วางชิ้นงาน</h2>
+<table>
+<tr><th>ลำดับ</th><th>หัวข้อ</th><th>ทำอะไร</th></tr>
+<tr><td>01</td><td>Set Modeling Scope</td><td>เปิด Device ให้แก้ไขได้</td></tr>
+<tr><td>02</td><td>Create Link</td><td>lnk1 ฐาน · lnk2 แกน X · lnk3 แกน Z</td></tr>
+<tr><td>03</td><td>Create Joint</td><td>j1 เลื่อน 0-250 · j2 เลื่อน 0-95 mm</td></tr>
+<tr><td>04</td><td>Pose Editor</td><td>HOME DOWN UP PLACE</td></tr>
+<tr><td>05</td><td>End Modeling</td><td>ปิดโหมดแก้ไข (อธิบาย ไม่บันทึกทับ)</td></tr>
+<tr><td>06</td><td>Device Operation</td><td>สั่ง Device จาก pose ไป pose</td></tr>
+<tr><td>07</td><td>Sequence Editor</td><td>6 operation ต่อกันด้วย Link</td></tr>
+<tr><td>08</td><td>Attach / Detach Event</td><td>ชิ้นงานติดไปกับหัวจับ</td></tr>
+<tr><td>09</td><td>Video + Web</td><td>Movie Recorder · Export to Web</td></tr>
+</table>
+<div class="tip">
+<strong>สิ่งที่ต้องมี:</strong> Process Simulate 2502 · โฟลเดอร์ <code>02_KINEMATICS</code> · <code>Library\</code> (Device, Part .cojt) · <code>1_Modeling.psz</code> · <code>2_Device_Operation.psz</code>
+</div>
+<h2>Workflow: 6 ช่วง</h2>
+<table>
+<tr><th>ช่วง</th><th>งาน</th><th>ทำอะไร</th><th>ไฟล์</th></tr>
+<tr><td>01</td><td>เปิดแก้ไข</td><td>Set Modeling Scope ให้ Device</td><td>1_Modeling</td></tr>
+<tr><td>02</td><td>Link + Joint</td><td>Kinematics Editor สร้าง 3 link 2 joint</td><td>1_Modeling</td></tr>
+<tr><td>03</td><td>Pose</td><td>Pose Editor ตั้งท่า 4 ท่า แล้ว End Modeling</td><td>1_Modeling</td></tr>
+<tr><td>04</td><td>Operation</td><td>Device Operation + Link ใน Sequence Editor</td><td>2_Device_Op</td></tr>
+<tr><td>05</td><td>Event</td><td>Attach ตอนหยิบ Detach ตอนวาง</td><td>2_Device_Op</td></tr>
+<tr><td>06</td><td>นำเสนอ</td><td>เล่น simulation อัดวิดีโอ ส่งออกเว็บ</td><td>2_Device_Op</td></tr>
+</table>
+
+<p class="lead" style="max-width:46em;">เปลี่ยนชิ้นส่วนที่นิ่งอยู่ให้เป็นเครื่องที่ขยับได้ — สร้างกลไก <strong>gantry</strong> แกน X / Z ทีละขั้น รวม 17 ขั้น แล้วสั่งให้หยิบ-วางกล่อง ตั้งแต่ Link, Joint, Pose ไปจนถึง Device Operation และ Event</p>
+
+<h2>ภาพรวม: สร้างกลไก gantry แล้วสั่งหยิบ-วางชิ้นงาน</h2>
+<table>
+<tr><th>ลำดับ</th><th>หัวข้อ</th><th>ทำอะไร</th></tr>
+<tr><td>01</td><td>Set Modeling Scope</td><td>เปิด Device ให้แก้ไขได้</td></tr>
+<tr><td>02</td><td>Create Link</td><td>lnk1 ฐาน · lnk2 แกน X · lnk3 แกน Z</td></tr>
+<tr><td>03</td><td>Create Joint</td><td>j1 เลื่อน 0-250 · j2 เลื่อน 0-95 mm</td></tr>
+<tr><td>04</td><td>Pose Editor</td><td>HOME DOWN UP PLACE</td></tr>
+<tr><td>05</td><td>End Modeling</td><td>ปิดโหมดแก้ไข (อธิบาย ไม่บันทึกทับ)</td></tr>
+<tr><td>06</td><td>Device Operation</td><td>สั่ง Device จาก pose ไป pose</td></tr>
+<tr><td>07</td><td>Sequence Editor</td><td>6 operation ต่อกันด้วย Link</td></tr>
+<tr><td>08</td><td>Attach / Detach Event</td><td>ชิ้นงานติดไปกับหัวจับ</td></tr>
+<tr><td>09</td><td>Video + Web</td><td>Movie Recorder · Export to Web</td></tr>
+</table>
+<div class="tip">
+<strong>สิ่งที่ต้องมี:</strong> Process Simulate · โฟลเดอร์ <code>02_KINEMATICS</code> · <code>Library\</code> (Device, Part .cojt) · <code>1_Modeling.psz</code> · <code>2_Device_Operation.psz</code>
+</div>
+<h2>Workflow: 6 ช่วง</h2>
+<table>
+<tr><th>ช่วง</th><th>งาน</th><th>ทำอะไร</th><th>ไฟล์</th></tr>
+<tr><td>01</td><td>เปิดแก้ไข</td><td>Set Modeling Scope ให้ Device</td><td>1_Modeling</td></tr>
+<tr><td>02</td><td>Link + Joint</td><td>Kinematics Editor สร้าง 3 link 2 joint</td><td>1_Modeling</td></tr>
+<tr><td>03</td><td>Pose</td><td>Pose Editor ตั้งท่า 4 ท่า แล้ว End Modeling</td><td>1_Modeling</td></tr>
+<tr><td>04</td><td>Operation</td><td>Device Operation + Link ใน Sequence Editor</td><td>2_Device_Op</td></tr>
+<tr><td>05</td><td>Event</td><td>Attach ตอนหยิบ Detach ตอนวาง</td><td>2_Device_Op</td></tr>
+<tr><td>06</td><td>นำเสนอ</td><td>เล่น simulation อัดวิดีโอ ส่งออกเว็บ</td><td>2_Device_Op</td></tr>
+</table>
+
+<h2>ขั้นที่ 1: ตั้ง System Root แล้วเปิด 1_Modeling.psz</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-01.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-01.jpg" alt="ขั้นที่ 1: ตั้ง System Root แล้วเปิด 1_Modeling.psz" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">หน้า Welcome (Home &gt; Welcome Page) มีรายการ Recent Files</span></li>
+    <li><span class="num">2</span><span class="text">คลิก 1_Modeling</span></li>
+    <li><span class="num">3</span><span class="text">System Root ต้องชี้โฟลเดอร์ 02_KINEMATICS\Library</span></li>
+    <li><span class="num">4</span><span class="text">เปิดแล้วเห็น gantry และกล่องแดง (Part)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 2: เลือก Device แล้วกด Set Modeling Scope</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-02.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-02.jpg" alt="ขั้นที่ 2: เลือก Device แล้วกด Set Modeling Scope" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">แท็บ Modeling</span></li>
+    <li><span class="num">2</span><span class="text">เลือก Device ใน Objects แล้วกด Set Modeling Scope</span></li>
+    <li><span class="num">3</span><span class="text">Device มีชิ้นส่วน 5 ตัว: TCPF (frame), Conveyor, Z, X, Body</span></li>
+    <li><span class="num">4</span><span class="text">ทุกชิ้นยังเป็นก้อนเดียวกัน ยังขยับไม่ได้</span></li>
+    <li><span class="num">5</span><span class="text">ช่อง Scope เปลี่ยนเป็น Device ปุ่มสร้าง geometry ใช้ได้แล้ว</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ข้อควรจำ:</strong> Modeling Scope คือการเปิด component ให้แก้ไขได้ ทำทีละ component เมื่อเสร็จต้อง End Modeling (ขั้นที่ 10)</div>
+
+<h2>ขั้นที่ 3: เปิด Kinematics Editor แล้วกด Create Link</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-03.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-03.jpg" alt="ขั้นที่ 3: เปิด Kinematics Editor แล้วกด Create Link" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Device ยังเลือกอยู่ กด Kinematics Editor</span></li>
+    <li><span class="num">2</span><span class="text">ปุ่มแรกซ้ายบน = Create Link</span></li>
+    <li><span class="num">3</span><span class="text">กล่อง lnk1 ขึ้นในกราฟ</span></li>
+    <li><span class="num">4</span><span class="text">หน้าต่าง Link Properties ชื่อ lnk1 (เปลี่ยนชื่อได้)</span></li>
+    <li><span class="num">5</span><span class="text">แถวสีเขียวใน Link Elements รอให้คลิกชิ้นส่วน (ขั้นที่ 4)</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>หมายเหตุ:</strong> ย้ายหน้าต่าง Kinematics Editor และ Link Properties ออกไปด้านขวา ไม่ให้บัง Objects tree</div>
+
+<h2>ขั้นที่ 4: lnk1 = Body + Conveyor (ส่วนที่อยู่นิ่ง)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-04.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-04.jpg" alt="ขั้นที่ 4: lnk1 = Body + Conveyor (ส่วนที่อยู่นิ่ง)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">คลิก Body ใน Objects</span></li>
+    <li><span class="num">2</span><span class="text">คลิก Conveyor</span></li>
+    <li><span class="num">3</span><span class="text">ทั้ง 2 ชิ้นขึ้นในรายการ แถวเขียวเลื่อนลงรอชิ้นถัดไป</span></li>
+    <li><span class="num">4</span><span class="text">กด OK</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ระวัง:</strong> tree เลื่อนขึ้นลงหลังคลิกแต่ละครั้ง ดูชื่อก่อนคลิกชิ้นถัดไป ถ้าคลิกผิด (ในภาพเคยได้ TCPF) ให้คลิกชื่อนั้นในรายการแล้วกด Delete</div>
+
+<h2>ขั้นที่ 5: lnk2 = X และ lnk3 = Z + TCPF</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-05.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-05.jpg" alt="ขั้นที่ 5: lnk2 = X และ lnk3 = Z + TCPF" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">lnk1 สีส้ม = ฐาน</span></li>
+    <li><span class="num">2</span><span class="text">lnk2 สีเขียว = แคร่แกน X</span></li>
+    <li><span class="num">3</span><span class="text">lnk3 สีเหลือง = หัวจับแกน Z</span></li>
+    <li><span class="num">4</span><span class="text">สีในหน้าจอ 3D ตรงกับสีของ link</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 6: ลากจาก lnk1 ไป lnk2 สร้าง joint j1 (แกน X)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-06.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-06.jpg" alt="ขั้นที่ 6: ลากจาก lnk1 ไป lnk2 สร้าง joint j1 (แกน X)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">กดค้างที่ lnk1</span></li>
+    <li><span class="num">2</span><span class="text">ลากไปปล่อยที่ lnk2 หน้าต่าง Joint Properties เปิดขึ้น</span></li>
+    <li><span class="num">3</span><span class="text">Name = j1</span></li>
+    <li><span class="num">4</span><span class="text">แกน From 0,0,0 To = -100, 0, 0 (ทิศ -X)</span></li>
+    <li><span class="num">5</span><span class="text">Joint type = Prismatic (เลื่อน)</span></li>
+    <li><span class="num">6</span><span class="text">ลูกศรล่างซ้ายเปิดส่วน Limits แล้ว Limits type = Constant</span></li>
+    <li><span class="num">7</span><span class="text">High limit = 250 Low limit = 0</span></li>
+    <li><span class="num">8</span><span class="text">กด OK</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 7: ลากจาก lnk2 ไป lnk3 สร้าง j2 (แกน Z ลง)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-07.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-07.jpg" alt="ขั้นที่ 7: ลากจาก lnk2 ไป lnk3 สร้าง j2 (แกน Z ลง)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Parent = lnk2 Child = lnk3</span></li>
+    <li><span class="num">2</span><span class="text">แกน To = 0, 0, -100 (ทิศลง -Z)</span></li>
+    <li><span class="num">3</span><span class="text">Prismatic</span></li>
+    <li><span class="num">4</span><span class="text">Constant 0 ถึง 95 แล้ว OK</span></li>
+    <li><span class="num">5</span><span class="text">เส้น j1 lnk1 &gt; lnk2</span></li>
+    <li><span class="num">6</span><span class="text">เส้น j2 lnk2 &gt; lnk3</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 8: Pose Editor &gt; New ตั้งค่า joint แล้วตั้งชื่อ pose</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-08.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-08.jpg" alt="ขั้นที่ 8: Pose Editor &gt; New ตั้งค่า joint แล้วตั้งชื่อ pose" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก Device กด Pose Editor (มี HOME อยู่แล้ว)</span></li>
+    <li><span class="num">2</span><span class="text">กด New หน้าต่าง Joint Jog เปิด</span></li>
+    <li><span class="num">3</span><span class="text">พิมพ์ j2 = 95 (หรือลากแถบ)</span></li>
+    <li><span class="num">4</span><span class="text">Lower / Upper Limit = ค่าที่ตั้งในขั้น 6-7</span></li>
+    <li><span class="num">5</span><span class="text">Pose name = DOWN</span></li>
+    <li><span class="num">6</span><span class="text">กด OK</span></li>
+    <li><span class="num">7</span><span class="text">หัวจับลงถึงกล่องแดงพอดี = ทิศ j2 ถูก</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 9: สร้างให้ครบ 4 pose แล้ว Jump กลับ HOME</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-09.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-09.jpg" alt="ขั้นที่ 9: สร้างให้ครบ 4 pose แล้ว Jump กลับ HOME" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">รายการมี HOME DOWN UP PLACE (HOME = j1 0, j2 0 มีมาตั้งแต่แรก)</span></li>
+    <li><span class="num">2</span><span class="text">เลือก HOME กด Jump ให้เครื่องกลับท่าเริ่มแล้ว Close</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ระวัง:</strong> ใช้ชื่อ pose ตามนี้ทุกตัวอักษร บท 1 อ้างชื่อเหล่านี้</div>
+
+<h2>ขั้นที่ 10: End Modeling และการบันทึก (อธิบาย)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-10.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-10.jpg" alt="ขั้นที่ 10: End Modeling และการบันทึก (อธิบาย)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">End Modeling (แท็บ Modeling) = ปิดโหมดแก้ไขและเก็บกลไกลงไฟล์ชิ้นส่วน .cojt ใน Library</span></li>
+    <li><span class="num">2</span><span class="text">คำถาม Save ไฟล์ .psz: ตอบ No ถ้าเป็นการฝึก หรือใช้ Save As ชื่อใหม่ ถ้าจะเก็บงาน</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ระวัง:</strong> Library\Device.cojt ใช้ร่วมกับ 2_Device_Operation (ไฟล์เฉลย) ถ้า End Modeling แล้วบันทึกทับไฟล์เฉลยจะเปลี่ยนตาม ในห้องเรียนให้คัดลอกโฟลเดอร์ 02_KINEMATICS ไว้ก่อน</div>
+
+<h2>ขั้นที่ 11: เปิด 2_Device_Operation แล้ว New Device Operation</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-11.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-11.jpg" alt="ขั้นที่ 11: เปิด 2_Device_Operation แล้ว New Device Operation" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก Device แท็บ Operation &gt; ลูกศร New Operation</span></li>
+    <li><span class="num">2</span><span class="text">New Device Operation</span></li>
+    <li><span class="num">3</span><span class="text">Name ตั้งชื่อ (ไฟล์ตัวอย่างใช้ชื่อ pose ปลายทาง)</span></li>
+    <li><span class="num">4</span><span class="text">Device = Device</span></li>
+    <li><span class="num">5</span><span class="text">From pose = ท่าปัจจุบัน</span></li>
+    <li><span class="num">6</span><span class="text">To pose = DOWN</span></li>
+    <li><span class="num">7</span><span class="text">Duration = 5 วินาที (ลูกศรล่างซ้ายเปิดส่วนนี้)</span></li>
+    <li><span class="num">8</span><span class="text">กด OK</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 12: ได้ Device_Op 5 วินาที กด Play หัวจับลงหยิบ</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-12.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-12.jpg" alt="ขั้นที่ 12: ได้ Device_Op 5 วินาที กด Play หัวจับลงหยิบ" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Device_Op ขึ้นใน Operation tree และถูกตั้งเป็น current operation ให้เอง</span></li>
+    <li><span class="num">2</span><span class="text">แถบใน Sequence Editor ยาว 5 วินาที</span></li>
+    <li><span class="num">3</span><span class="text">กด Play Simulation Forward</span></li>
+    <li><span class="num">4</span><span class="text">ที่ 5.00 วินาที หัวจับอยู่ที่ DOWN (แต่ยังไม่จับกล่อง ต้องมี Attach Event)</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>หมายเหตุ:</strong> ตอนทำภาพลบ Device_Op ทิ้ง (เลือกแล้วกด Delete) เพราะไฟล์มีชุดเฉลยใน CompOp อยู่แล้ว</div>
+
+<h2>ขั้นที่ 13: CompOp = 6 Device Operation ต่อกันด้วย Link รวม 32 วินาที</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-13.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-13.jpg" alt="ขั้นที่ 13: CompOp = 6 Device Operation ต่อกันด้วย Link รวม 32 วินาที" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก CompOp &gt; Set Current Operation ลำดับ DOWN &gt; HOME &gt; UP &gt; PLACE &gt; UP &gt; HOME</span></li>
+    <li><span class="num">2</span><span class="text">ลูกศรดำ = Link (เลือก 2 operation ใน Sequence Editor แล้วกดปุ่ม Link)</span></li>
+    <li><span class="num">3</span><span class="text">จุดแดง = Attach Event ตอนจบ DOWN</span></li>
+    <li><span class="num">4</span><span class="text">จุดแดง = Detach Event ตอนเริ่ม UP ตัวที่ 2</span></li>
+    <li><span class="num">5</span><span class="text">จบที่ 32 วินาที = 6 × 5 + รอ 1 วินาที 2 ครั้ง</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 14: Attach Event ให้กล่องติดไปกับ lnk3</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-14.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-14.jpg" alt="ขั้นที่ 14: Attach Event ให้กล่องติดไปกับ lnk3" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">คลิกแถบ DOWN ใน Sequence Editor ก่อนแล้วกดลูกศร New Event</span></li>
+    <li><span class="num">2</span><span class="text">Attach Event = หยิบ</span></li>
+    <li><span class="num">3</span><span class="text">Detach Event = ปล่อย</span></li>
+    <li><span class="num">4</span><span class="text">Objects to Attach คลิก Part</span></li>
+    <li><span class="num">5</span><span class="text">To Object คลิกช่องแล้วคลิก lnk3</span></li>
+    <li><span class="num">6</span><span class="text">Start Time = 0</span></li>
+    <li><span class="num">7</span><span class="text">Before End of Task แล้ว OK Detach ทำแบบเดียวกันที่แถบ UP ตัวที่ 2: Detach Event, Objects = Part, After Start of Task 0 กล่องจะหลุดจากหัวจับตอนเริ่มยกขึ้น</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 15: เล่น CompOp ดูหยิบ-วางครบรอบ</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-15.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-15.jpg" alt="ขั้นที่ 15: เล่น CompOp ดูหยิบ-วางครบรอบ" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Jump Simulation to Start</span></li>
+    <li><span class="num">2</span><span class="text">Play Simulation Forward</span></li>
+    <li><span class="num">3</span><span class="text">ดูกล่องติดไปกับหัวจับหลัง DOWN และอยู่ที่แผ่นอีกฝั่งหลัง UP</span></li>
+    <li><span class="num">4</span><span class="text">จบ 32.00 วินาที หัวจับกลับ HOME</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 16: Record Video ด้วย Movie Recorder</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-16.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-16.jpg" alt="ขั้นที่ 16: Record Video ด้วย Movie Recorder" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">แท็บ Operation &gt; Movie Recorder แล้วกดเฟือง (Settings)</span></li>
+    <li><span class="num">2</span><span class="text">ปุ่มแดง = Record แล้วกด Play ใน Sequence Editor</span></li>
+    <li><span class="num">3</span><span class="text">Stop เมื่อเล่นจบ</span></li>
+    <li><span class="num">4</span><span class="text">ป้าย REC ขึ้นในหน้าจอ 3D ระหว่างอัด</span></li>
+    <li><span class="num">5</span><span class="text">Destination โฟลเดอร์ที่เก็บไฟล์</span></li>
+    <li><span class="num">6</span><span class="text">Format MPEG-4 (.mp4)</span></li>
+    <li><span class="num">7</span><span class="text">ความละเอียด FullHD</span></li>
+    <li><span class="num">8</span><span class="text">OK</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 17: Export to Web ส่งงานให้คนที่ไม่มี Process Simulate</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/02-17.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/02-17.jpg" alt="ขั้นที่ 17: Export to Web ส่งงานให้คนที่ไม่มี Process Simulate" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">File &gt; Import / Export</span></li>
+    <li><span class="num">2</span><span class="text">Export to Web</span></li>
+    <li><span class="num">3</span><span class="text">File name ตั้งชื่อ .html</span></li>
+    <li><span class="num">4</span><span class="text">Launch in browser</span></li>
+    <li><span class="num">5</span><span class="text">Level of details Low = ไฟล์เล็ก</span></li>
+    <li><span class="num">6</span><span class="text">Include simulation Operation = CompOp</span></li>
+    <li><span class="num">7</span><span class="text">OK</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>ผลลัพธ์:</strong> KINEMATICS_WebView.html (9 MB) ในโฟลเดอร์คือไฟล์ที่ส่งออกไว้เปิดด้วย browser หมุนดูโมเดลและเล่น simulation ได้</div>
+
+<h2>ไฟล์ในบทเรียนและสิ่งที่อยู่ในแต่ละไฟล์</h2>
+<table>
+<tr><th>ไฟล์</th><th>สถานะ Device</th><th>Operation</th></tr>
+<tr><td>1_Modeling.psz</td><td>Device + Part ยังไม่มี link / joint</td><td>ไม่มี</td></tr>
+<tr><td>2_Device_Operation.psz</td><td>Device มี lnk1-3, j1 (X 0-250), j2 (Z 0-95), pose HOME DOWN UP PLACE</td><td>CompOp: 6 Device Operation ตัวละ 5 วินาที + Attach / Detach รวม 32 วินาที</td></tr>
+<tr><td>Library\Device.cojt</td><td>ไฟล์ชิ้นส่วน gantry ที่มีกลไกแล้ว (เฉลย)</td><td>End Modeling บันทึกลงไฟล์นี้</td></tr>
+<tr><td>Library\Part.cojt</td><td>กล่องแดงที่ถูกหยิบ</td><td>-</td></tr>
+<tr><td>KINEMATICS_WebView.html</td><td>ผลของ Export to Web</td><td>เปิดด้วย browser</td></tr>
+</table>
+
+<h2>เช็กลิสต์: ผู้เรียนทำได้ครบหรือยัง</h2>
+<table>
+<tr><th>ข้อ</th><th>สิ่งที่ต้องทำได้</th><th>ตรวจด้วย</th></tr>
+<tr><td>1</td><td>Set Modeling Scope ให้ Device</td><td>ช่อง Scope แสดง Device</td></tr>
+<tr><td>2</td><td>สร้าง link 3 ตัวและแบ่งชิ้นส่วนถูก</td><td>Show colors: ฐานส้ม แกน X เขียว หัวจับเหลือง</td></tr>
+<tr><td>3</td><td>สร้าง joint แบบ Prismatic พร้อมแกนและระยะ</td><td>j1 0-250, j2 0-95 ใน Joint Jog</td></tr>
+<tr><td>4</td><td>สร้าง pose 4 ท่า</td><td>Pose Editor มี HOME DOWN UP PLACE</td></tr>
+<tr><td>5</td><td>อธิบาย End Modeling และการไม่บันทึกทับ</td><td>ไฟล์ใน Library ไม่เปลี่ยน</td></tr>
+<tr><td>6</td><td>สร้าง Device Operation จาก pose</td><td>แถบ 5 วินาทีใน Sequence Editor</td></tr>
+<tr><td>7</td><td>Attach / Detach Event</td><td>กล่องย้ายไปแผ่นอีกฝั่ง</td></tr>
+<tr><td>8</td><td>อัดวิดีโอและ Export to Web</td><td>ได้ไฟล์ .mp4 และ .html</td></tr>
+</table>
+
+<h2>ปัญหาที่พบบ่อยและวิธีแก้</h2>
+<table>
+<tr><th>อาการ</th><th>วิธีแก้</th></tr>
+<tr><td>Kinematics Editor เป็นสีเทา</td><td>ยังไม่ได้ Set Modeling Scope หรือไม่ได้เลือก Device</td></tr>
+<tr><td>หน้าต่างบัง Objects tree</td><td>ลากหน้าต่าง Kinematics Editor / Link Properties ไปด้านขวาก่อนคลิกชิ้นส่วน</td></tr>
+<tr><td>ได้ชิ้นส่วนผิดใน Link Elements</td><td>tree เลื่อนหลังคลิก คลิกชื่อผิดในรายการแล้วกด Delete</td></tr>
+<tr><td>Joint type / Limits type ไม่เปลี่ยน</td><td>เปิดรายการแล้วคลิกที่ชื่อ (ลูกศรขึ้นลงบนคีย์บอร์ดไม่เลือกให้)</td></tr>
+<tr><td>Joint Jog แล้วเลื่อนผิดทิศ</td><td>แก้แกน To ของ joint (เช่น -100 แทน 100) ใน Kinematics Editor</td></tr>
+<tr><td>New Event / Attach Event เป็นสีเทา</td><td>คลิกแถบ operation ใน Sequence Editor ก่อน</td></tr>
+<tr><td>เพิ่ม Event ผิดแล้ว Ctrl+Z ไม่หาย</td><td>เปิดไฟล์ใหม่ (Welcome &gt; Recent Files) แล้วตอบ No ที่คำถาม Save</td></tr>
+<tr><td>ปิดไฟล์แล้วถาม Save</td><td>No = ไม่เก็บสิ่งที่ลอง ถ้าจะเก็บใช้ Save As ชื่อใหม่</td></tr>
+</table>
+
+        <div class="page-nav">
+          <a href="01.html">← ก่อนหน้า: 01. Part Assembly</a>
+          <a href="03.html">ถัดไป: 03. Basic Process →</a>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        Process Simulate Tutorial
+      </footer>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="inner">
+      <nav id="menu">
+        <header class="major"><button class="sidebar-close" aria-label="ปิดเมนู">✕</button><h2>เมนู</h2></header>
+        <ul>
+          <li><a href="../index.html">หน้าแรก</a></li>
+          <li><a href="../pre-test.html">แบบทดสอบก่อนเรียน</a></li>
+          <li><a href="00.html">00. CAD Import</a></li>
+          <li><a href="01.html">01. Part Assembly</a></li>
+          <li class="active"><a href="02.html">02. Kinematics</a></li>
+          <li><a href="03.html">03. Basic Process</a></li>
+          <li><a href="04.html">04. Robot and Gripper</a></li>
+          <li><a href="05.html">05. BIW Spot Welding</a></li>
+          <li><a href="06.html">06. Robot Painting</a></li>
+          <li><a href="07.html">07. Robot Press Line</a></li>
+          <li><a href="08.html">08. AGV</a></li>
+          <li><a href="09.html">09. Human Basic</a></li>
+          <li><a href="../post-test.html">แบบทดสอบหลังเรียน และ Feedback</a></li>
+        </ul>
+      </nav>
+      <footer id="footer"><p class="copyright">Process Simulate Tutorial</p></footer>
+    </div>
+  </div>
+  <div id="sidebar-overlay"></div>
+</div>
+<script src="../assets/main.js?v=30d529e9"></script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>08. AGV — Process Simulate Tutorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css?v=72b73deb">
+</head>
+<body>
+<div id="wrapper">
+  <div id="main">
+    <div class="inner">
+      <header id="header">
+        <a href="../index.html" class="logo"><span>Process Simulate Tutorial</span></a>
+        <button class="menu-toggle" aria-label="เปิดเมนู" aria-expanded="false">☰</button>
+      </header>
+
+      <main>
+        <h1>08. AGV</h1>
+
+        <div class="objectives">
+          <p>วัตถุประสงค์การเรียนรู้</p>
+          <ol>
+          <li>เปิด study แบบ Line Simulation Mode (event-based) แล้ว Insert Component</li>
+          <li>สร้าง AGV, AGV Target และ AGV Carpet (พรมนำทางตามเส้นโค้ง)</li>
+          <li>สั่งรถด้วย Simulation Panel: Force ความเร็วและเป้าหมาย (TargetIndex = ID ไม่ใช่ชื่อ)</li>
+          <li>เพิ่ม LiDAR บน KUKA_AGV และสั่งหยุดฉุกเฉินด้วย EmergencyStop</li>
+          </ol>
+        </div>
+
+<p class="lead" style="max-width:46em;">ให้รถ <strong>AGV</strong> วิ่งไปเป้าหมายด้วย signal ทีละขั้น รวม 12 ขั้น — ตั้งแต่เปิด study แบบ event-based สร้างรถ เป้าหมาย และพรม ไปจนถึงเซนเซอร์ LiDAR และการหยุดฉุกเฉิน</p>
+
+<h2>ภาพรวม: ให้รถ AGV วิ่งไปเป้าหมายด้วย signal</h2>
+<table>
+<tr><th>ลำดับ</th><th>หัวข้อ</th><th>ทำอะไร</th></tr>
+<tr><td>01</td><td>Line Simulation</td><td>เปิด study แบบ event-based</td></tr>
+<tr><td>02</td><td>Create AGV</td><td>ให้ชิ้นส่วนเป็นรถ AGV</td></tr>
+<tr><td>03</td><td>Create AGV Target</td><td>จุดหมายที่รถวิ่งไป</td></tr>
+<tr><td>04</td><td>Create AGV Carpet</td><td>พรมนำทางรถวิ่งตามเส้น</td></tr>
+<tr><td>05</td><td>Simulation Panel</td><td>Force ความเร็วและเป้าหมาย</td></tr>
+<tr><td>06</td><td>Target ID</td><td>TargetIndex = ID ไม่ใช่ชื่อ</td></tr>
+<tr><td>07</td><td>LiDAR</td><td>เซนเซอร์บน KUKA_AGV</td></tr>
+<tr><td>08</td><td>EmergencyStop</td><td>สั่งรถหยุดทันที</td></tr>
+<tr><td>09</td><td>Logic Block</td><td>ช่องสั่งและช่องสถานะของรถ</td></tr>
+</table>
+<div class="tip">
+<strong>สิ่งที่ต้องมี:</strong> Process Simulate 2502 · โฟลเดอร์ <code>08_AGV</code> · <code>Library\</code> (5 ไฟล์ .cojt) · <code>AGV_Step0</code> ถึง <code>Step3</code> <code>.psz</code>
+</div>
+<h2>Workflow: 6 ช่วง</h2>
+<table>
+<tr><th>ช่วง</th><th>งาน</th><th>ทำอะไร</th><th>ไฟล์</th></tr>
+<tr><td>01</td><td>1: เปิดแบบ Line Sim</td><td>System Root, Open in Line Simulation Mode, Insert Component</td><td>Step0</td></tr>
+<tr><td>02</td><td>2: AGV + Target</td><td>Set Modeling Scope, Create AGV, Create AGV Target</td><td>Step0</td></tr>
+<tr><td>03</td><td>3: Carpet</td><td>Create AGV Carpet จากเส้นโค้ง</td><td>Step1</td></tr>
+<tr><td>04</td><td>4: Drive AGV</td><td>Simulation Panel, Force, Play</td><td>Step2</td></tr>
+<tr><td>05</td><td>5: LiDAR</td><td>เซนเซอร์บน KUKA_AGV</td><td>Step3</td></tr>
+<tr><td>06</td><td>6: E-Stop</td><td>Force EmergencyStop</td><td>Step3</td></tr>
+</table>
+<p>ใน study (อ่านจากไฟล์ใน PS 2502): <strong>2</strong> รถ AGV (AGV, KUKA_AGV) · <strong>4</strong> เป้าหมาย (AGV_Target_1 ถึง 4) · <strong>49</strong> signal (รถ 17 ต่อคัน + เป้าหมาย 5 ต่อจุด)</p>
+
+<p class="lead" style="max-width:46em;">ให้รถ <strong>AGV</strong> วิ่งไปเป้าหมายด้วย signal ทีละขั้น รวม 12 ขั้น — ตั้งแต่เปิด study แบบ event-based สร้างรถ เป้าหมาย และพรม ไปจนถึงเซนเซอร์ LiDAR และการหยุดฉุกเฉิน</p>
+
+<h2>ภาพรวม: ให้รถ AGV วิ่งไปเป้าหมายด้วย signal</h2>
+<table>
+<tr><th>ลำดับ</th><th>หัวข้อ</th><th>ทำอะไร</th></tr>
+<tr><td>01</td><td>Line Simulation</td><td>เปิด study แบบ event-based</td></tr>
+<tr><td>02</td><td>Create AGV</td><td>ให้ชิ้นส่วนเป็นรถ AGV</td></tr>
+<tr><td>03</td><td>Create AGV Target</td><td>จุดหมายที่รถวิ่งไป</td></tr>
+<tr><td>04</td><td>Create AGV Carpet</td><td>พรมนำทางรถวิ่งตามเส้น</td></tr>
+<tr><td>05</td><td>Simulation Panel</td><td>Force ความเร็วและเป้าหมาย</td></tr>
+<tr><td>06</td><td>Target ID</td><td>TargetIndex = ID ไม่ใช่ชื่อ</td></tr>
+<tr><td>07</td><td>LiDAR</td><td>เซนเซอร์บน KUKA_AGV</td></tr>
+<tr><td>08</td><td>EmergencyStop</td><td>สั่งรถหยุดทันที</td></tr>
+<tr><td>09</td><td>Logic Block</td><td>ช่องสั่งและช่องสถานะของรถ</td></tr>
+</table>
+<div class="tip">
+<strong>สิ่งที่ต้องมี:</strong> Process Simulate · โฟลเดอร์ <code>08_AGV</code> · <code>Library\</code> (5 ไฟล์ .cojt) · <code>AGV_Step0</code> ถึง <code>Step3</code> <code>.psz</code>
+</div>
+<h2>Workflow: 6 ช่วง</h2>
+<table>
+<tr><th>ช่วง</th><th>งาน</th><th>ทำอะไร</th><th>ไฟล์</th></tr>
+<tr><td>01</td><td>1: เปิดแบบ Line Sim</td><td>System Root, Open in Line Simulation Mode, Insert Component</td><td>Step0</td></tr>
+<tr><td>02</td><td>2: AGV + Target</td><td>Set Modeling Scope, Create AGV, Create AGV Target</td><td>Step0</td></tr>
+<tr><td>03</td><td>3: Carpet</td><td>Create AGV Carpet จากเส้นโค้ง</td><td>Step1</td></tr>
+<tr><td>04</td><td>4: Drive AGV</td><td>Simulation Panel, Force, Play</td><td>Step2</td></tr>
+<tr><td>05</td><td>5: LiDAR</td><td>เซนเซอร์บน KUKA_AGV</td><td>Step3</td></tr>
+<tr><td>06</td><td>6: E-Stop</td><td>Force EmergencyStop</td><td>Step3</td></tr>
+</table>
+<p>ใน study (อ่านจากไฟล์ตัวอย่าง): <strong>2</strong> รถ AGV (AGV, KUKA_AGV) · <strong>4</strong> เป้าหมาย (AGV_Target_1 ถึง 4) · <strong>49</strong> signal (รถ 17 ต่อคัน + เป้าหมาย 5 ต่อจุด)</p>
+
+<h2>ขั้นที่ 1: System Root แล้ว Open in Line Simulation Mode</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-01.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-01.jpg" alt="ขั้นที่ 1: System Root แล้ว Open in Line Simulation Mode" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Welcome Page &gt; System Root = ...\08_AGV\Library</span></li>
+    <li><span class="num">2</span><span class="text">ปุ่มกลาง Open in Line Simulation Mode</span></li>
+    <li><span class="num">3</span><span class="text">เลือก AGV_Step0_Insert_Component</span></li>
+    <li><span class="num">4</span><span class="text">Open (โหลดราว 15 วินาที)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 2: Step0 มีชิ้นส่วน 5 ชิ้นจาก Library</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-02.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-02.jpg" alt="ขั้นที่ 2: Step0 มีชิ้นส่วน 5 ชิ้นจาก Library" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Modeling &gt; Insert Component &gt; Library</span></li>
+    <li><span class="num">2</span><span class="text">AGV, AGV_Target, Carpet, KUKA_AGV, Lidar_sensor</span></li>
+    <li><span class="num">3</span><span class="text">AGV กล่องสีฟ้า (0, 5000)</span></li>
+    <li><span class="num">4</span><span class="text">KUKA_AGV สีเทา (0, -5000)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 3: Set Modeling Scope ก่อนปุ่ม Create AGV จึงกดได้</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-03.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-03.jpg" alt="ขั้นที่ 3: Set Modeling Scope ก่อนปุ่ม Create AGV จึงกดได้" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Create AGV เป็นสีเทาเมื่อเลือกชิ้นธรรมดา</span></li>
+    <li><span class="num">2</span><span class="text">แท็บ Modeling &gt; Set Modeling Scope</span></li>
+    <li><span class="num">3</span><span class="text">กลับแท็บ Control: Create AGV กดได้แล้ว</span></li>
+    <li><span class="num">4</span><span class="text">ก่อน: เทา</span></li>
+    <li><span class="num">5</span><span class="text">เลือก KUKA_AGV (ไอคอนเปลี่ยนเป็นเปิดแก้ไข)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 4: Create AGV ได้ Logic Block ของรถ</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-04.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-04.jpg" alt="ขั้นที่ 4: Create AGV ได้ Logic Block ของรถ" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">ช่องสั่ง (Entries) MotionPlannerType, Speed, TargetIndex ...</span></li>
+    <li><span class="num">2</span><span class="text">ช่องสถานะ (Exits) ActualSpeed, Busy, CurrentTarget ...</span></li>
+    <li><span class="num">3</span><span class="text">OK</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 5: Create AGV Target แล้วดู signal ที่สร้าง</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-05.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-05.jpg" alt="ขั้นที่ 5: Create AGV Target แล้วดู signal ที่สร้าง" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">AGV_Target &gt; Set Modeling Scope &gt; Create AGV Target</span></li>
+    <li><span class="num">2</span><span class="text">ID เลขประจำเป้าหมายใช้สั่งรถ</span></li>
+    <li><span class="num">3</span><span class="text">KUKA_AGV_ 17 signal</span></li>
+    <li><span class="num">4</span><span class="text">AGV_Target_ 5 signal</span></li>
+  </ol></div>
+</div>
+
+<h2>AGV Logic Block: ช่องสั่งและช่องสถานะ</h2>
+<figure class="screenshot">
+  <a href="../assets/images/lessons/08-06.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-06.jpg" alt="AGV Logic Block: ช่องสั่งและช่องสถานะ" loading="lazy"></a>
+</figure>
+
+<h2>ขั้นที่ 6: Create AGV Carpet ให้เส้นเป็นพรมนำทาง</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-07.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-07.jpg" alt="ขั้นที่ 6: Create AGV Carpet ให้เส้นเป็นพรมนำทาง" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก Carpet</span></li>
+    <li><span class="num">2</span><span class="text">เส้น Line, Spline, Arc, Polyline (8 เส้น)</span></li>
+    <li><span class="num">3</span><span class="text">Control &gt; AGV &gt; Create AGV Carpet</span></li>
+    <li><span class="num">4</span><span class="text">&quot;Carpet is now used as AGV carpet&quot; &gt; OK</span></li>
+  </ol></div>
+</div>
+
+<h2>ไม่มีพรม vs มีพรม: เส้นทางของรถต่างกัน</h2>
+<figure class="screenshot">
+  <a href="../assets/images/lessons/08-08.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-08.jpg" alt="ไม่มีพรม vs มีพรม: เส้นทางของรถต่างกัน" loading="lazy"></a>
+</figure>
+
+<h2>ขั้นที่ 7: Simulation Panel ใส่ signal ของรถ</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-09.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-09.jpg" alt="ขั้นที่ 7: Simulation Panel ใส่ signal ของรถ" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Control &gt; Debug &gt; Signals + Simulation Panel</span></li>
+    <li><span class="num">2</span><span class="text">Ctrl+คลิก AGV_Speed, AGV_TargetIndex</span></li>
+    <li><span class="num">3</span><span class="text">AGV_Busy, AGV_CurrentTarget (ดูสถานะ)</span></li>
+    <li><span class="num">4</span><span class="text">รวม 4 signal</span></li>
+    <li><span class="num">5</span><span class="text">ปุ่มแรก Add Signal to Viewer</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 8: Force ความเร็ว 200 และเป้าหมาย 1 แล้ว Play</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-10.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-10.jpg" alt="ขั้นที่ 8: Force ความเร็ว 200 และเป้าหมาย 1 แล้ว Play" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">ติ๊ก Forced</span></li>
+    <li><span class="num">2</span><span class="text">AGV_Speed = 200 (mm/s)</span></li>
+    <li><span class="num">3</span><span class="text">AGV_TargetIndex = 1</span></li>
+    <li><span class="num">4</span><span class="text">ปุ่ม Play ใต้หน้าจอ 3D</span></li>
+    <li><span class="num">5</span><span class="text">รถวิ่งตามพรมถึงเป้าหมาย</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ระวัง:</strong> ดับเบิลคลิกช่อง Forced Value แล้วลบค่าเดิมก่อนพิมพ์ ไม่อย่างนั้นตัวเลขต่อท้าย (พิมพ์ 1 ได้ 10) Play ครั้งแรกมีข้อความ Simulation slider กด OK</div>
+
+<h2>ขั้นที่ 9: TargetIndex คือ ID ของเป้าหมาย ไม่ใช่เลขท้ายชื่อ</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-11.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-11.jpg" alt="ขั้นที่ 9: TargetIndex คือ ID ของเป้าหมาย ไม่ใช่เลขท้ายชื่อ" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">AGV_Target_2.ID = 4</span></li>
+    <li><span class="num">2</span><span class="text">AGV_Target_1.ID = 3</span></li>
+    <li><span class="num">3</span><span class="text">AGV_Target_4.ID = 2</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 10: LiDAR Sensor บน KUKA_AGV</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-12.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-12.jpg" alt="ขั้นที่ 10: LiDAR Sensor บน KUKA_AGV" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Detection range 1000 mm</span></li>
+    <li><span class="num">2</span><span class="text">Coverage sector 120°</span></li>
+    <li><span class="num">3</span><span class="text">Number of rays 20</span></li>
+    <li><span class="num">4</span><span class="text">Fields</span></li>
+    <li><span class="num">5</span><span class="text">Monitoring cases (ว่าง)</span></li>
+    <li><span class="num">6</span><span class="text">สร้างใหม่: Control &gt; Sensors &gt; Create LiDAR Sensor</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 11: Play: LiDAR วิ่งไปพร้อม KUKA_AGV</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-13.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-13.jpg" alt="ขั้นที่ 11: Play: LiDAR วิ่งไปพร้อม KUKA_AGV" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">KUKA_AGV + เส้นขอบ LiDAR ตอนเริ่ม</span></li>
+    <li><span class="num">2</span><span class="text">พื้นที่สีเหลือง = รัศมีตรวจจับ วิ่งไปพร้อมรถ</span></li>
+    <li><span class="num">3</span><span class="text">ถึงเป้าหมาย ID 1 ที่ (0, 0)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 12: EmergencyStop หยุดรถทันทีแล้ววิ่งต่อ</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/08-14.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/08-14.jpg" alt="ขั้นที่ 12: EmergencyStop หยุดรถทันทีแล้ววิ่งต่อ" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">KUKA_AGV_Speed 100 / TargetIndex 3</span></li>
+    <li><span class="num">2</span><span class="text">ติ๊ก Forced ที่ KUKA_AGV_EmergencyStop คลิกช่องค่า: แดง = OFF / เขียว = ON</span></li>
+  </ol></div>
+</div>
+
+<h2>ไฟล์ในบทเรียนและสิ่งที่อยู่ในแต่ละไฟล์</h2>
+<table>
+<tr><th>ไฟล์</th><th>สิ่งที่มี</th></tr>
+<tr><td>AGV_Step0_Insert_Component.psz</td><td>AGV, AGV_Target, Carpet, KUKA_AGV, Lidar_sensor (ยังไม่มี signal)</td></tr>
+<tr><td>AGV_Step1_Create_AGV_and_AGV_Target.psz</td><td>+ รถ 2 คันเป็น AGV + เป้าหมาย 3 จุด (signal 44 ตัว)</td></tr>
+<tr><td>AGV_Step2_Create_AGV_Carpet.psz</td><td>+ พรม + AGV_Target_4 (signal 49 ตัว)</td></tr>
+<tr><td>AGV_Step3_Lidar_Sensor.psz</td><td>+ LiDAR บน KUKA_AGV + ค่า Force ใน Simulation Panel</td></tr>
+<tr><td>Library\ (5 ไฟล์ .cojt)</td><td>AGV, AGV_Target, Carpet, KUKA_AGV, Lidar_sensor</td></tr>
+</table>
+
+<h2>เช็กลิสต์: ผู้เรียนทำได้ครบหรือยัง</h2>
+<table>
+<tr><th>ข้อ</th><th>สิ่งที่ต้องทำได้</th><th>ตรวจด้วย</th></tr>
+<tr><td>1</td><td>เปิด study แบบ Line Simulation Mode</td><td>แถบล่างขึ้น Line Simulation Mode</td></tr>
+<tr><td>2</td><td>Set Modeling Scope + Create AGV / AGV Target</td><td>signal ของรถและเป้าหมายใน Signals</td></tr>
+<tr><td>3</td><td>Create AGV Carpet</td><td>"Carpet is now used as AGV carpet"</td></tr>
+<tr><td>4</td><td>Force Speed / TargetIndex แล้ว Play</td><td>รถวิ่งตามพรมถึงเป้าหมาย</td></tr>
+<tr><td>5</td><td>อ่าน ID ของเป้าหมาย</td><td>บอกได้ว่า TargetIndex 3 ไปจุดไหน</td></tr>
+<tr><td>6</td><td>EmergencyStop ON / OFF</td><td>รถหยุดแล้ววิ่งต่อ</td></tr>
+</table>
+
+<h2>ปัญหาที่พบบ่อยและวิธีแก้</h2>
+<table>
+<tr><th>อาการ</th><th>วิธีแก้</th></tr>
+<tr><td>เมนู Open in Line Simulation Mode กดไม่ติด</td><td>ใช้ปุ่มกลางใต้ System Root ในหน้า Welcome</td></tr>
+<tr><td>Create AGV / AGV Target สีเทา</td><td>เลือกชิ้นนั้นแล้ว Modeling &gt; Set Modeling Scope ก่อน</td></tr>
+<tr><td>พิมพ์ Forced Value แล้วได้ค่าผิด (1 เป็น 10)</td><td>ลบค่าเดิมก่อนพิมพ์</td></tr>
+<tr><td>รถวิ่งไปผิดจุด</td><td>TargetIndex คือ ID ดูค่า ID ใน Simulation Panel</td></tr>
+<tr><td>กด Play แล้วไม่มีอะไรเกิด</td><td>ปิดหน้าต่าง Signals ที่บังปุ่ม Play / กด OK ข้อความ Simulation slider</td></tr>
+<tr><td>LiDAR ไม่ทำให้รถหยุดเอง</td><td>ต้องมี Fields / Monitoring Cases จาก SICK · บทนี้สั่ง EmergencyStop ด้วยมือ</td></tr>
+</table>
+
+        <div class="page-nav">
+          <a href="07.html">← ก่อนหน้า: 07. Robot Press Line</a>
+          <a href="09.html">ถัดไป: 09. Human Basic →</a>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        Process Simulate Tutorial
+      </footer>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="inner">
+      <nav id="menu">
+        <header class="major"><button class="sidebar-close" aria-label="ปิดเมนู">✕</button><h2>เมนู</h2></header>
+        <ul>
+          <li><a href="../index.html">หน้าแรก</a></li>
+          <li><a href="../pre-test.html">แบบทดสอบก่อนเรียน</a></li>
+          <li><a href="00.html">00. CAD Import</a></li>
+          <li><a href="01.html">01. Part Assembly</a></li>
+          <li><a href="02.html">02. Kinematics</a></li>
+          <li><a href="03.html">03. Basic Process</a></li>
+          <li><a href="04.html">04. Robot and Gripper</a></li>
+          <li><a href="05.html">05. BIW Spot Welding</a></li>
+          <li><a href="06.html">06. Robot Painting</a></li>
+          <li><a href="07.html">07. Robot Press Line</a></li>
+          <li class="active"><a href="08.html">08. AGV</a></li>
+          <li><a href="09.html">09. Human Basic</a></li>
+          <li><a href="../post-test.html">แบบทดสอบหลังเรียน และ Feedback</a></li>
+        </ul>
+      </nav>
+      <footer id="footer"><p class="copyright">Process Simulate Tutorial</p></footer>
+    </div>
+  </div>
+  <div id="sidebar-overlay"></div>
+</div>
+<script src="../assets/main.js?v=30d529e9"></script>
+</body>
+</html>

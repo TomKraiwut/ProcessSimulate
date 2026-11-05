@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05. BIW Spot Welding — Process Simulate Tutorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css?v=72b73deb">
+</head>
+<body>
+<div id="wrapper">
+  <div id="main">
+    <div class="inner">
+      <header id="header">
+        <a href="../index.html" class="logo"><span>Process Simulate Tutorial</span></a>
+        <button class="menu-toggle" aria-label="เปิดเมนู" aria-expanded="false">☰</button>
+      </header>
+
+      <main>
+        <h1>05. BIW Spot Welding</h1>
+
+        <div class="objectives">
+          <p>วัตถุประสงค์การเรียนรู้</p>
+          <ol>
+          <li>สร้างจุดเชื่อมด้วย Weld Point (Preserve จาก SPOT_CD) และฉายจุดลงผิวชิ้นงานด้วย Project</li>
+          <li>สร้าง Weld Operation (Weld_Op 10 จุด) และใช้ Gun Search เลือกปืนที่เชื่อมได้ครบจาก 14 รุ่น</li>
+          <li>ติด Fixture และหุ่น S040R03 พร้อมปืนด้วย Mount Tool</li>
+          <li>ใช้ Pie Chart / WDC ปรับมุมเข้าอัตโนมัติ และตั้ง Start / via ก่อน-หลังจุดเชื่อม</li>
+          <li>ตรวจ Collision แล้วเพิ่ม via หลบ จากนั้น Mirror ให้หุ่นตัวที่ 2 เชื่อมอีกฝั่ง</li>
+          </ol>
+        </div>
+
+<p class="lead" style="max-width:46em;">งานเชื่อมจุดตัวถังรถ (BIW) ทีละขั้น รวม 25 ขั้น — ตั้งแต่สร้างจุดเชื่อมและเลือกปืน วางจิ๊กและหุ่น ปรับมุมเข้า-ออก ตรวจชน ไปจนถึง Mirror ให้หุ่นอีกตัวเชื่อมอีกฝั่งพร้อมกัน</p>
+
+<h2>ภาพรวม: จากจุดเชื่อมถึงหุ่น 2 ตัว</h2>
+<table>
+<tr><th>ลำดับ</th><th>หัวข้อ</th><th>ทำอะไร</th></tr>
+<tr><td>01</td><td>Weld Point</td><td>Preserve จุดจาก SPOT_CD แล้วสร้างจุดเชื่อม</td></tr>
+<tr><td>02</td><td>Project</td><td>ฉายจุดลงผิว PartC ได้ทิศของจุด</td></tr>
+<tr><td>03</td><td>Weld Operation</td><td>Weld_Op รวม 10 จุด</td></tr>
+<tr><td>04</td><td>Gun Search</td><td>ปืน 14 รุ่น รุ่นไหนเชื่อมได้ครบ</td></tr>
+<tr><td>05</td><td>Fixture + Robot</td><td>จิ๊กจับชิ้นงาน หุ่น S040R03 ติดปืน</td></tr>
+<tr><td>06</td><td>Pie Chart / WDC</td><td>มุมที่ปืนเข้าได้ ปรับมุมอัตโนมัติ</td></tr>
+<tr><td>07</td><td>Approach / Depart</td><td>Start และ via ก่อน-หลังจุดเชื่อม</td></tr>
+<tr><td>08</td><td>Collision</td><td>หาจุดชนแล้วเพิ่ม via หลบ</td></tr>
+<tr><td>09</td><td>Mirror</td><td>หุ่นตัวที่ 2 เชื่อมอีกฝั่ง</td></tr>
+</table>
+<div class="tip">
+<strong>สิ่งที่ต้องมี:</strong> Process Simulate 2502 · โฟลเดอร์ <code>05_BIW_SPOT_WELDING</code> · <code>Library\</code> (Part, Resource) · <code>1_</code> ถึง <code>8_</code> <code>.psz</code>
+</div>
+<h2>Workflow: 6 ช่วง</h2>
+<table>
+<tr><th>ช่วง</th><th>งาน</th><th>ทำอะไร</th><th>ไฟล์</th></tr>
+<tr><td>01</td><td>1-2: จุดเชื่อม + ปืน</td><td>Weld Point, Project, Weld Op, Gun Search</td><td>1_ / 2_</td></tr>
+<tr><td>02</td><td>3-4: เซลล์</td><td>Fixture, Robot, Mount Tool</td><td>3_ / 4_</td></tr>
+<tr><td>03</td><td>5: WDC</td><td>Pie Chart, Automatic Approach Angle</td><td>ต่อจากบท 4</td></tr>
+<tr><td>04</td><td>6: เข้า-ออก</td><td>Start, via ก่อน-หลังจุด</td><td>5_WDC</td></tr>
+<tr><td>05</td><td>7: ตรวจชน</td><td>Collision Set, Collision Mode</td><td>6_Approach</td></tr>
+<tr><td>06</td><td>8: Mirror</td><td>Mirror, Compound Operation</td><td>7_Collision</td></tr>
+</table>
+<p>งานครบในไฟล์ 8: หุ่น 2 ตัวเชื่อมฝั่งละ 10 จุดพร้อมกัน = <strong>62.53 วินาที</strong> (อ่านจาก Sequence Editor)</p>
+
+<p class="lead" style="max-width:46em;">งานเชื่อมจุดตัวถังรถ (BIW) ทีละขั้น รวม 25 ขั้น — ตั้งแต่สร้างจุดเชื่อมและเลือกปืน วางจิ๊กและหุ่น ปรับมุมเข้า-ออก ตรวจชน ไปจนถึง Mirror ให้หุ่นอีกตัวเชื่อมอีกฝั่งพร้อมกัน</p>
+
+<h2>ภาพรวม: จากจุดเชื่อมถึงหุ่น 2 ตัว</h2>
+<table>
+<tr><th>ลำดับ</th><th>หัวข้อ</th><th>ทำอะไร</th></tr>
+<tr><td>01</td><td>Weld Point</td><td>Preserve จุดจาก SPOT_CD แล้วสร้างจุดเชื่อม</td></tr>
+<tr><td>02</td><td>Project</td><td>ฉายจุดลงผิว PartC ได้ทิศของจุด</td></tr>
+<tr><td>03</td><td>Weld Operation</td><td>Weld_Op รวม 10 จุด</td></tr>
+<tr><td>04</td><td>Gun Search</td><td>ปืน 14 รุ่น รุ่นไหนเชื่อมได้ครบ</td></tr>
+<tr><td>05</td><td>Fixture + Robot</td><td>จิ๊กจับชิ้นงาน หุ่น S040R03 ติดปืน</td></tr>
+<tr><td>06</td><td>Pie Chart / WDC</td><td>มุมที่ปืนเข้าได้ ปรับมุมอัตโนมัติ</td></tr>
+<tr><td>07</td><td>Approach / Depart</td><td>Start และ via ก่อน-หลังจุดเชื่อม</td></tr>
+<tr><td>08</td><td>Collision</td><td>หาจุดชนแล้วเพิ่ม via หลบ</td></tr>
+<tr><td>09</td><td>Mirror</td><td>หุ่นตัวที่ 2 เชื่อมอีกฝั่ง</td></tr>
+</table>
+<div class="tip">
+<strong>สิ่งที่ต้องมี:</strong> Process Simulate · โฟลเดอร์ <code>05_BIW_SPOT_WELDING</code> · <code>Library\</code> (Part, Resource) · <code>1_</code> ถึง <code>8_</code> <code>.psz</code>
+</div>
+<h2>Workflow: 6 ช่วง</h2>
+<table>
+<tr><th>ช่วง</th><th>งาน</th><th>ทำอะไร</th><th>ไฟล์</th></tr>
+<tr><td>01</td><td>1-2: จุดเชื่อม + ปืน</td><td>Weld Point, Project, Weld Op, Gun Search</td><td>1_ / 2_</td></tr>
+<tr><td>02</td><td>3-4: เซลล์</td><td>Fixture, Robot, Mount Tool</td><td>3_ / 4_</td></tr>
+<tr><td>03</td><td>5: WDC</td><td>Pie Chart, Automatic Approach Angle</td><td>ต่อจากบท 4</td></tr>
+<tr><td>04</td><td>6: เข้า-ออก</td><td>Start, via ก่อน-หลังจุด</td><td>5_WDC</td></tr>
+<tr><td>05</td><td>7: ตรวจชน</td><td>Collision Set, Collision Mode</td><td>6_Approach</td></tr>
+<tr><td>06</td><td>8: Mirror</td><td>Mirror, Compound Operation</td><td>7_Collision</td></tr>
+</table>
+<p>งานครบในไฟล์ 8: หุ่น 2 ตัวเชื่อมฝั่งละ 10 จุด พร้อมกัน = <strong>62.53 วินาที</strong> (อ่านจาก Sequence Editor)</p>
+
+<h2>ขั้นที่ 1: ตั้ง System Root แล้วเปิด 1_Weld_Point</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-01.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-01.jpg" alt="ขั้นที่ 1: ตั้ง System Root แล้วเปิด 1_Weld_Point" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">File</span></li>
+    <li><span class="num">2</span><span class="text">Disconnected Study</span></li>
+    <li><span class="num">3</span><span class="text">Open in Standard Mode</span></li>
+    <li><span class="num">4</span><span class="text">เลือก 1_Weld_Point &gt; Open</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 2: ไฟล์ 1 มี PartC, PartD และ SPOT_CD (จุดอ้างอิง)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-02.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-02.jpg" alt="ขั้นที่ 2: ไฟล์ 1 มี PartC, PartD และ SPOT_CD (จุดอ้างอิง)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Set Modeling Scope</span></li>
+    <li><span class="num">2</span><span class="text">ช่อง Scope = SPOT_CD</span></li>
+    <li><span class="num">3</span><span class="text">SPOT_CD ชิ้นอ้างอิงจากงานต้นฉบับ</span></li>
+    <li><span class="num">4</span><span class="text">Weld_10p จุด point1-10 ที่ใช้</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 3: Set as Preserved Objects ให้จุด point1-10</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-03.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-03.jpg" alt="ขั้นที่ 3: Set as Preserved Objects ให้จุด point1-10" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Shift+คลิก point10 (เลือก 10 จุด)</span></li>
+    <li><span class="num">2</span><span class="text">Set as Preserved Objects (แท็บ Modeling กลุ่ม Geometry)</span></li>
+    <li><span class="num">3</span><span class="text">1 คลิก point1</span></li>
+    <li><span class="num">4</span><span class="text">ไอคอนจุดเปลี่ยนเป็นสีเขียว = Preserved</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 4: Create Weld Points แล้วคลิกจุดสีแดงบนชิ้นงาน</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-04.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-04.jpg" alt="ขั้นที่ 4: Create Weld Points แล้วคลิกจุดสีแดงบนชิ้นงาน" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">แท็บ Process &gt; ปุ่ม Create Weld Points (ไอคอนจุดสีฟ้า)</span></li>
+    <li><span class="num">2</span><span class="text">คลิกจุดแดงในหน้าจอ 3D ทีละจุด</span></li>
+    <li><span class="num">3</span><span class="text">Home &gt; Mfgs ได้ wp, wp1, ...</span></li>
+    <li><span class="num">4</span><span class="text">ตอนทำภาพได้ 9 จุด (ไฟล์ 2 มี 10 จุด)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 5: Project Weld Points ฉายจุดลงผิว PartC</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-05.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-05.jpg" alt="ขั้นที่ 5: Project Weld Points ฉายจุดลงผิว PartC" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Project weld points on a customized list of parts</span></li>
+    <li><span class="num">2</span><span class="text">ช่องเขียว Parts</span></li>
+    <li><span class="num">3</span><span class="text">Obtain Parts แล้วลบ SPOT_CD ให้เหลือ PartC</span></li>
+    <li><span class="num">4</span><span class="text">Project</span></li>
+    <li><span class="num">5</span><span class="text">ฉายแบบแม่นไม่ผ่าน: ตอบ Yes (ฉายแบบประมาณ)</span></li>
+    <li><span class="num">6</span><span class="text">ได้ลูกศรทิศของจุดบนผิว</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 6: New Weld Operation (Weld_Op) ใส่จุดเชื่อม</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-06.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-06.jpg" alt="ขั้นที่ 6: New Weld Operation (Weld_Op) ใส่จุดเชื่อม" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Robot / Gun ว่างไว้ก่อน (บท 2, 4)</span></li>
+    <li><span class="num">2</span><span class="text">Weld List คลิกช่องเขียวแล้วเลือก wp ทั้งหมด</span></li>
+    <li><span class="num">3</span><span class="text">OK</span></li>
+    <li><span class="num">4</span><span class="text">1 Name = Weld_Op</span></li>
+    <li><span class="num">5</span><span class="text">Weld_Op มีจุดเชื่อมเรียงตามลำดับ</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ระวัง:</strong> เลือก Operations (ต้นไม้ล่างซ้าย) ก่อนเปิด Operation &gt; New Operation &gt; New Weld Operation ถ้าเลือก Part เมนูจะเป็นสีเทา ใน Weld List ให้เลือก wp จากต้นไม้ Operations (เลือกจาก Mfgs ขึ้น Invalid Location)</div>
+
+<h2>ขั้นที่ 7: Insert Component ปืน 15 รุ่นจาก SPOT_GUN</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-07.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-07.jpg" alt="ขั้นที่ 7: Insert Component ปืน 15 รุ่นจาก SPOT_GUN" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Ctrl+คลิกเลือกปืนหลายรุ่น</span></li>
+    <li><span class="num">2</span><span class="text">Open</span></li>
+    <li><span class="num">3</span><span class="text">1 Modeling &gt; Insert Component &gt; Resource\SPOT_GUN</span></li>
+    <li><span class="num">4</span><span class="text">ปืนขึ้นใน Resources</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 8: Weld_Op &gt; Operation Properties ตั้ง Gun แล้ว Set Current</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-08.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-08.jpg" alt="ขั้นที่ 8: Weld_Op &gt; Operation Properties ตั้ง Gun แล้ว Set Current" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">คลิกขวา Weld_Op &gt; Operation Properties &gt; แท็บ Process</span></li>
+    <li><span class="num">2</span><span class="text">Gun คลิกช่องแล้วคลิก SPOT_GUN_MAA32963S ใน Objects</span></li>
+    <li><span class="num">3</span><span class="text">OK</span></li>
+    <li><span class="num">4</span><span class="text">คลิกขวา Weld_Op &gt; Set Current Operation (ต้องมีก่อน Gun Search)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 9: Geometric Gun Search เลือกจุดและปืน</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-09.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-09.jpg" alt="ขั้นที่ 9: Geometric Gun Search เลือกจุดและปืน" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Process &gt; Geometric Gun Search &gt; Next: จุดของ Weld_Op ขึ้นเอง</span></li>
+    <li><span class="num">2</span><span class="text">Select guns from Study &gt; Shift เลือกทุกปืน</span></li>
+    <li><span class="num">3</span><span class="text">ปุ่ม &gt;</span></li>
+    <li><span class="num">4</span><span class="text">ปืนที่จะทดสอบ</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 10: ตั้งการตรวจชนแล้ว Search</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-10.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-10.jpg" alt="ขั้นที่ 10: ตั้งการตรวจชนแล้ว Search" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">All objects in Study (ชนกับทุกอย่าง)</span></li>
+    <li><span class="num">2</span><span class="text">Gun States: Closed + Open</span></li>
+    <li><span class="num">3</span><span class="text">Gun Rotation หมุนปืนหาท่า 180° / 90 สเต็ป</span></li>
+    <li><span class="num">4</span><span class="text">Next &gt; Search</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 11: ผล Gun Search: ปืนไหนเชื่อมได้ครบ 10 จุด</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-11.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-11.jpg" alt="ขั้นที่ 11: ผล Gun Search: ปืนไหนเชื่อมได้ครบ 10 จุด" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">C_GUN 0 % ชนตั้งแต่ wp</span></li>
+    <li><span class="num">2</span><span class="text">100 % = เครื่องหมายถูกทุกจุด</span></li>
+    <li><span class="num">3</span><span class="text">tmx_140 0 % / X_GUN 40 %</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 12: Insert Fixture (MAA28354S + PALLET)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-12.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-12.jpg" alt="ขั้นที่ 12: Insert Fixture (MAA28354S + PALLET)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Insert Component &gt; Resource\LINE_CD เลือก MAA28354S_BASE ถึง TRANSFER</span></li>
+    <li><span class="num">2</span><span class="text">Ctrl+คลิก PALLET</span></li>
+    <li><span class="num">3</span><span class="text">Open</span></li>
+    <li><span class="num">4</span><span class="text">Fixture ขึ้นที่พื้น (Z 0) ใต้ชิ้นงาน</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 13: Placement ยก Fixture ขึ้น Z 1267 ให้รับชิ้นงาน</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-13.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-13.jpg" alt="ขั้นที่ 13: Placement ยก Fixture ขึ้น Z 1267 ให้รับชิ้นงาน" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือกชิ้น Fixture ทั้ง 17 (Shift) &gt; Placement Manipulator &gt; แกน Z</span></li>
+    <li><span class="num">2</span><span class="text">พิมพ์ 1267 Enter</span></li>
+    <li><span class="num">3</span><span class="text">Close</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 14: ไฟล์ 4 มี compound Gun, Fixture แล้วใส่หุ่น</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-14.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-14.jpg" alt="ขั้นที่ 14: ไฟล์ 4 มี compound Gun, Fixture แล้วใส่หุ่น" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Gun frame + SPOT_GUN</span></li>
+    <li><span class="num">2</span><span class="text">Fixture 17 ชิ้น</span></li>
+    <li><span class="num">3</span><span class="text">Gripper / Base จากงานเต็ม (ไม่ใช้)</span></li>
+    <li><span class="num">4</span><span class="text">ROBOT_MODEL\irb6650_320</span></li>
+    <li><span class="num">5</span><span class="text">Open</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 15: Placement วาง S040R03 ที่ (2800, -2900, 0) Rz 90</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-15.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-15.jpg" alt="ขั้นที่ 15: Placement วาง S040R03 ที่ (2800, -2900, 0) Rz 90" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Placement Manipulator &gt; ลูกศรขยาย</span></li>
+    <li><span class="num">2</span><span class="text">Rz = 90 ก่อน</span></li>
+    <li><span class="num">3</span><span class="text">X = 2800</span></li>
+    <li><span class="num">4</span><span class="text">Y = -2900</span></li>
+    <li><span class="num">5</span><span class="text">ก่อน: จุด 0 ซ้อนใน Fixture</span></li>
+    <li><span class="num">6</span><span class="text">หลัง: หันเข้าหาชิ้นงาน</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 16: Mount Tool ติด SPOT_GUN แล้วตั้ง Robot ให้ Weld_Op</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-16.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-16.jpg" alt="ขั้นที่ 16: Mount Tool ติด SPOT_GUN แล้วตั้ง Robot ให้ Weld_Op" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">S040R03 &gt; Robot &gt; Mount Tool &gt; Tool = SPOT_GUN_MAA32963S</span></li>
+    <li><span class="num">2</span><span class="text">Frame = Base Frame</span></li>
+    <li><span class="num">3</span><span class="text">Mount on = S040R03</span></li>
+    <li><span class="num">4</span><span class="text">TOOLFRAME</span></li>
+    <li><span class="num">5</span><span class="text">Apply</span></li>
+    <li><span class="num">6</span><span class="text">Weld_Op &gt; Operation Properties &gt; Process &gt; Robot = S040R03</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 17: Pie Chart ดูช่วงมุมที่ปืนเข้าเชื่อมได้</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-17.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-17.jpg" alt="ขั้นที่ 17: Pie Chart ดูช่วงมุมที่ปืนเข้าเชื่อมได้" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">แดง = หุ่นเอื้อมไม่ถึง</span></li>
+    <li><span class="num">2</span><span class="text">น้ำเงิน = เข้าได้ (All OK)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 18: Automatic Approach Angle ปรับมุมทุกจุดอัตโนมัติ</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-18.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-18.jpg" alt="ขั้นที่ 18: Automatic Approach Angle ปรับมุมทุกจุดอัตโนมัติ" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Robot = S040R03</span></li>
+    <li><span class="num">2</span><span class="text">Tool = SPOT_GUN</span></li>
+    <li><span class="num">3</span><span class="text">Optimal zone</span></li>
+    <li><span class="num">4</span><span class="text">ทุกจุดได้ถูก</span></li>
+    <li><span class="num">5</span><span class="text">Execute</span></li>
+    <li><span class="num">6</span><span class="text">Weld Distribution Center: 30.75 วินาที</span></li>
+    <li><span class="num">7</span><span class="text">Assign (10)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 19: Add Location Before ได้ via แล้วถอย Z -100</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-19.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-19.jpg" alt="ขั้นที่ 19: Add Location Before ได้ via แล้วถอย Z -100" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก wp (ต้นไม้ Operations) &gt; Operation &gt; Add Location Before ได้ via</span></li>
+    <li><span class="num">2</span><span class="text">Robot Jog เปิดเอง: แกน Z ของ TCPF</span></li>
+    <li><span class="num">3</span><span class="text">กดลูกศรถอยจน -100</span></li>
+    <li><span class="num">4</span><span class="text">Close</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>ทำซ้ำ:</strong> เลือก wp &gt; Add Location After ได้ via1 แล้วถอย -100 เหมือนกันทุกจุด จุดเชื่อมได้คู่ via ก่อน-หลัง (ไฟล์ 6 มี 32 จุด)</div>
+
+<h2>ขั้นที่ 20: Start ที่ท่า Home แล้วเรียงให้อยู่หน้าสุด</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-20.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-20.jpg" alt="ขั้นที่ 20: Start ที่ท่า Home แล้วเรียงให้อยู่หน้าสุด" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">S040R03 &gt; Robot &gt; Home &gt; Add Current Location &gt; F2 = Start</span></li>
+    <li><span class="num">2</span><span class="text">Path Editor: Move Up ให้ Start อยู่บนสุด</span></li>
+    <li><span class="num">3</span><span class="text">ไฟล์ 5 = 30.75 วินาที</span></li>
+    <li><span class="num">4</span><span class="text">เล่นได้ 47.23 วินาที</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 21: Collision Set: ปืนกับชิ้นงาน + Fixture</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-21.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-21.jpg" alt="ขั้นที่ 21: Collision Set: ปืนกับชิ้นงาน + Fixture" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Check = SPOT_GUN_MAA32963S</span></li>
+    <li><span class="num">2</span><span class="text">With = SPOT_CD</span></li>
+    <li><span class="num">3</span><span class="text">Fixture</span></li>
+    <li><span class="num">4</span><span class="text">OK</span></li>
+    <li><span class="num">5</span><span class="text">New Collision Set</span></li>
+    <li><span class="num">6</span><span class="text">Edit Collision Set</span></li>
+    <li><span class="num">7</span><span class="text">ไฟล์ 6 มี new_collision_set แล้ว</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 22: Collision Mode แล้วเล่น: ไฟล์ 6 ปืนชนชิ้นงาน</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-22.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-22.jpg" alt="ขั้นที่ 22: Collision Mode แล้วเล่น: ไฟล์ 6 ปืนชนชิ้นงาน" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">ชิ้นที่ชนเป็นสีแดงในหน้าจอ 3D</span></li>
+    <li><span class="num">2</span><span class="text">Collision: SPOT_GUN, C, SPOT_CD</span></li>
+    <li><span class="num">3</span><span class="text">Home &gt; Collision Mode (สีฟ้า = เปิด)</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ระวัง:</strong> เปิดไฟล์ใหม่แล้ว Collision Mode จะปิดเอง ต้องกดเปิดอีกครั้งก่อนเล่น ไม่งั้นรายการว่างเหมือนไม่ชน</div>
+
+<h2>ขั้นที่ 23: เพิ่ม via หลบ: ไฟล์ 7 ไม่ชนแล้ว (62.39 วินาที)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-23.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-23.jpg" alt="ขั้นที่ 23: เพิ่ม via หลบ: ไฟล์ 7 ไม่ชนแล้ว (62.39 วินาที)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">No pairs to display = ไม่มีคู่ที่ชน</span></li>
+    <li><span class="num">2</span><span class="text">ไฟล์ 7 เพิ่ม via20-via31 (47 จุด) ระหว่างจุดที่ชน</span></li>
+    <li><span class="num">3</span><span class="text">Weld_Op 62.39 วินาที</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 24: Mirror Operation ได้หุ่นและงานอีกฝั่ง</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-24.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-24.jpg" alt="ขั้นที่ 24: Mirror Operation ได้หุ่นและงานอีกฝั่ง" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก Weld_Op &gt; Operation &gt; Mirror</span></li>
+    <li><span class="num">2</span><span class="text">Weld_Op_mirrored</span></li>
+    <li><span class="num">3</span><span class="text">Apply</span></li>
+    <li><span class="num">4</span><span class="text">ระนาบกระจก (แกน XZ)</span></li>
+    <li><span class="num">5</span><span class="text">ได้ Weld_Op_mirrored</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 25: Compound Operation: หุ่น 2 ตัวเชื่อมพร้อมกัน 62.53 วินาที</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/05-25.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/05-25.jpg" alt="ขั้นที่ 25: Compound Operation: หุ่น 2 ตัวเชื่อมพร้อมกัน 62.53 วินาที" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">CompOp = Weld_Op + Weld_Op_mirrored (ไม่ Link)</span></li>
+    <li><span class="num">2</span><span class="text">จบ 62.53 เท่าตัวที่นานสุด</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>สรุป:</strong> New Compound Operation &gt; ลาก Weld_Op และ Weld_Op_mirrored เข้า &gt; Set Current Operation &gt; เล่น สองงานไม่ได้ Link กัน จึงทำพร้อมกัน เวลาไม่บวกกัน</div>
+
+<h2>ไฟล์ในบทเรียนและสิ่งที่อยู่ในแต่ละไฟล์</h2>
+<table>
+<tr><th>ไฟล์</th><th>สิ่งที่มี</th><th>Weld_Op</th></tr>
+<tr><td>1_Weld_Point.psz</td><td>PartC, PartD, SPOT_CD (ยังไม่มีจุดเชื่อม)</td><td>-</td></tr>
+<tr><td>2_Weld_Gun.psz</td><td>+ จุดเชื่อม 10 จุด + Weld_Op</td><td>20.00</td></tr>
+<tr><td>3_Fixture.psz</td><td>+ ปืน 15 รุ่น · Gun = SPOT_GUN_MAA32963S</td><td>30.75</td></tr>
+<tr><td>4_Robot.psz</td><td>+ compound Gun / Fixture / Gripper / Base</td><td>30.75</td></tr>
+<tr><td>5_WDC.psz</td><td>+ S040R03 ติดปืน · มุมจุดปรับแล้ว</td><td>30.75</td></tr>
+<tr><td>6_Approach_Aeparture_Angle.psz</td><td>+ Start / via ก่อน-หลัง (32 จุด)</td><td>46.50</td></tr>
+<tr><td>7_Collision_Check.psz</td><td>+ via หลบชน (47 จุด)</td><td>62.40</td></tr>
+<tr><td>8_Mirror_Operation.psz</td><td>+ หุ่น/งาน mirrored + CompOp</td><td>62.53</td></tr>
+</table>
+
+<h2>เช็กลิสต์: ผู้เรียนทำได้ครบหรือยัง</h2>
+<table>
+<tr><th>ข้อ</th><th>สิ่งที่ต้องทำได้</th><th>ตรวจด้วย</th></tr>
+<tr><td>1</td><td>Preserve จุด, Create Weld Points, Project</td><td>จุดมีลูกศรทิศบนผิว PartC</td></tr>
+<tr><td>2</td><td>New Weld Operation</td><td>Weld_Op มี 10 จุด</td></tr>
+<tr><td>3</td><td>Gun Search และอ่านผล</td><td>บอกได้ว่าปืนไหน 100 %</td></tr>
+<tr><td>4</td><td>Insert Fixture / Robot + Placement + Mount Tool</td><td>ปืนติดหุ่น S040R03</td></tr>
+<tr><td>5</td><td>Pie Chart / Automatic Approach Angle</td><td>ทุกจุดเป็นเครื่องหมายถูก</td></tr>
+<tr><td>6</td><td>via ก่อน-หลัง + Start</td><td>เล่น Weld_Op ได้ครบ</td></tr>
+<tr><td>7</td><td>Collision Set + Collision Mode</td><td>No pairs to display</td></tr>
+<tr><td>8</td><td>Mirror + Compound</td><td>หุ่น 2 ตัวเชื่อมพร้อมกัน</td></tr>
+</table>
+
+<h2>ปัญหาที่พบบ่อยและวิธีแก้</h2>
+<table>
+<tr><th>อาการ</th><th>วิธีแก้</th></tr>
+<tr><td>Set as Preserved Objects สีเทา</td><td>Set Modeling Scope ที่ SPOT_CD ก่อนและเลือกจุดแต่ละตัว (ไม่ใช่ Weld_10p)</td></tr>
+<tr><td>Projection on exact part geometry failed</td><td>ตอบ Yes ให้ฉายแบบประมาณ</td></tr>
+<tr><td>New Weld Operation สีเทา</td><td>เลือก Operations ในต้นไม้ล่างซ้ายก่อน</td></tr>
+<tr><td>Weld List ขึ้น Invalid Location</td><td>เลือก wp จากต้นไม้ Operations ไม่ใช่ Mfgs</td></tr>
+<tr><td>Gun Search ไม่มีจุดให้เลือก</td><td>ตั้ง Gun แล้ว Set Current Operation ก่อน</td></tr>
+<tr><td>Robot Jog พิมพ์ค่าแล้วไม่ขยับ</td><td>กดลูกศรตาม Step Size แทน</td></tr>
+<tr><td>เล่นแล้วไม่มีผลการชน</td><td>เปิด Collision Mode ใหม่ทุกครั้งที่เปิดไฟล์</td></tr>
+<tr><td>Mirror เตือน Missing the assigned robot</td><td>กด OK แล้วใส่หุ่นตัวที่ 2 ให้ Weld_Op_mirrored</td></tr>
+</table>
+
+        <div class="page-nav">
+          <a href="04.html">← ก่อนหน้า: 04. Robot and Gripper</a>
+          <a href="06.html">ถัดไป: 06. Robot Painting →</a>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        Process Simulate Tutorial
+      </footer>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="inner">
+      <nav id="menu">
+        <header class="major"><button class="sidebar-close" aria-label="ปิดเมนู">✕</button><h2>เมนู</h2></header>
+        <ul>
+          <li><a href="../index.html">หน้าแรก</a></li>
+          <li><a href="../pre-test.html">แบบทดสอบก่อนเรียน</a></li>
+          <li><a href="00.html">00. CAD Import</a></li>
+          <li><a href="01.html">01. Part Assembly</a></li>
+          <li><a href="02.html">02. Kinematics</a></li>
+          <li><a href="03.html">03. Basic Process</a></li>
+          <li><a href="04.html">04. Robot and Gripper</a></li>
+          <li class="active"><a href="05.html">05. BIW Spot Welding</a></li>
+          <li><a href="06.html">06. Robot Painting</a></li>
+          <li><a href="07.html">07. Robot Press Line</a></li>
+          <li><a href="08.html">08. AGV</a></li>
+          <li><a href="09.html">09. Human Basic</a></li>
+          <li><a href="../post-test.html">แบบทดสอบหลังเรียน และ Feedback</a></li>
+        </ul>
+      </nav>
+      <footer id="footer"><p class="copyright">Process Simulate Tutorial</p></footer>
+    </div>
+  </div>
+  <div id="sidebar-overlay"></div>
+</div>
+<script src="../assets/main.js?v=30d529e9"></script>
+</body>
+</html>
