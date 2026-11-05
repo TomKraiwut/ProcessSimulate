@@ -1,83 +1,52 @@
 # -*- coding: utf-8 -*-
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from gen_site import page_html, write
+from gen_site import (SECTIONS, QUIZ_PAGES, page_html, write, chapter_filename, chapter_numbers,
+                      chapter_title, chapter_label, HUB_CARD_DESC)
 
-BODY = '''        <section id="banner">
+
+def quiz_card(page, badge, desc):
+    return f'''        <div class="card-grid">
+          <a href="{page}" class="card">
+            <div class="icon number">{badge}</div>
+            <h3>{QUIZ_PAGES[page]["title"]}</h3>
+            <p>{desc}</p>
+          </a>
+        </div>'''
+
+
+def cards(section):
+    out = []
+    for n, i in enumerate(chapter_numbers(section)):
+        out.append(f'''          <a href="{chapter_filename(section, i)}" class="card">
+            <div class="icon number">{chapter_label(section, i)}</div>
+            <h3>{chapter_title(section, i)}</h3>
+            <p>{HUB_CARD_DESC[section][n]}</p>
+          </a>''')
+    return "\n".join(out)
+
+
+BODY = f"""        <section id="banner">
           <h1>เรียนรู้ Siemens Tecnomatix Process Simulate</h1>
-          <p class="tagline">เว็บไซต์สอนการใช้งานโปรแกรมจำลองกระบวนการผลิตและหุ่นยนต์อุตสาหกรรม (Robotics &amp; Manufacturing Simulation) ภาษาไทย</p>
+          <p class="tagline">ชุดสอน Step by Step บน Process Simulate ภาษาไทย</p>
           <p class="intro">
-            เนื้อหาแบ่งเป็น 3 ระดับ ตั้งแต่ยังไม่เคยเปิดโปรแกรมมาก่อน ไปจนถึงเขียน .NET API ควบคุมเซลล์
-            และส่งออกโปรแกรมหุ่นยนต์จริงด้วย Offline Programming พร้อมส่วนอ้างอิง Object, Case Study จากอุตสาหกรรมจริง
-            และ Tips and Tricks — เลือกเริ่มจากระดับที่ตรงกับพื้นฐานของคุณได้เลย
+            ลงมือทำทีละบท ตั้งแต่นำเข้า CAD, ประกอบชิ้นส่วน, Kinematics, Basic Process
+            ไปจนถึงหุ่นยนต์และ Gripper, งานเชื่อมจุดตัวถังรถ (BIW), งานพ่นสี, ไลน์ปั๊ม, AGV และคนจำลอง — ทุกบทมีภาพหน้าจอจริงพร้อมเลขกำกับ และตัวเลขที่วัดจริงใน Process Simulate
           </p>
         </section>
 
-        <div class="features">
-          <div class="feature">
-            <h3>🎯 เรียงตามลำดับการใช้งานจริง</h3>
-            <p>แต่ละบทต่อยอดจากบทก่อนหน้า ไม่ต้องท่องจำ ทำตามได้ทันที</p>
-          </div>
-          <div class="feature">
-            <h3>🧪 มีตัวอย่างและคำถามฝึกคิด</h3>
-            <p>ทุกบทมีตัวอย่างที่ลองทำตามได้ พร้อมคำถามท้ายบทเพื่อเช็กความเข้าใจ</p>
-          </div>
-          <div class="feature">
-            <h3>🤖 ครอบคลุมทั้งจำลองและส่งออกจริง</h3>
-            <p>ตั้งแต่หยิบ-วางชิ้นงานพื้นฐาน ไปจนถึง OLP ส่งโปรแกรมเข้าหุ่นยนต์จริง</p>
-          </div>
-        </div>
+        <h2>เริ่มที่นี่</h2>
+{quiz_card("pre-test.html", "ก่อน", "แบบทดสอบ 20 ข้อ และความคาดหวังต่อการเรียน ประมาณ 15 นาที — ใช้เทียบคะแนนกับหลังเรียน")}
 
-        <h2>เลือกระดับที่จะเรียน</h2>
+        <h2>{SECTIONS["lessons"]["label"]}</h2>
+        <p>แต่ละบทมีโฟลเดอร์ <code>Library</code> และไฟล์ <code>.psz</code> เรียงเลขตามขั้นตอน
+        เปิดไฟล์ของขั้นไหนก็ได้เป็นจุดเริ่มต้น ไม่ต้องทำขั้นก่อนหน้าให้เสร็จ</p>
         <div class="card-grid">
-          <a href="basic.html" class="card">
-            <div class="icon">🧩</div>
-            <h3>Basic — พื้นฐาน</h3>
-            <p>รู้จักหน้าตาโปรแกรม, Object พื้นฐาน, สร้างงาน Pick and Place แรกและรันซิมูเลชัน (6 บท)</p>
-          </a>
-          <a href="intermediate.html" class="card">
-            <div class="icon">🔧</div>
-            <h3>Intermediate — ขั้นกลาง</h3>
-            <p>Resource ขั้นกลาง, Path/Location ละเอียดขึ้น, Weld Operation, Collision Set (6 บท)</p>
-          </a>
-          <a href="advanced.html" class="card">
-            <div class="icon">⚙️</div>
-            <h3>Advanced — ขั้นสูง</h3>
-            <p>Logic Block, .NET API, Offline Programming, Human Simulation และ Multi-Robot Cell (7 บท)</p>
-          </a>
+{cards("lessons")}
         </div>
 
-        <h2>เนื้อหาเสริม</h2>
-        <div class="card-grid">
-          <a href="object-reference.html" class="card">
-            <div class="icon">📖</div>
-            <h3>Object Reference</h3>
-            <p>สาธิตการทำงานของแต่ละ Object เป็นหมวดหมู่ ใช้เปิดอ้างอิงเร็วๆ (3 หมวด)</p>
-          </a>
-          <a href="case-study.html" class="card">
-            <div class="icon">🏭</div>
-            <h3>Case Study</h3>
-            <p>ตัวอย่างการใช้งานจากสถานการณ์จริงใน 4 อุตสาหกรรม</p>
-          </a>
-          <a href="tips-tricks.html" class="card">
-            <div class="icon">💡</div>
-            <h3>Tips and Tricks</h3>
-            <p>เทคนิคเล็กๆ น้อยๆ ที่ช่วยประหยัดเวลาและลดข้อผิดพลาด (4 หมวด)</p>
-          </a>
-        </div>
-
-        <h2>Process Simulate คืออะไร?</h2>
-        <p class="lead">
-          Process Simulate (Tecnomatix Process Simulate) เป็นซอฟต์แวร์จำลองกระบวนการผลิตของ Siemens เน้นการวางแผนและตรวจสอบ
-          การทำงานของหุ่นยนต์อุตสาหกรรม สายการประกอบ และสถานีงานต่างๆ ในรูปแบบ 3 มิติ ก่อนติดตั้งจริงในโรงงาน
-          ช่วยตรวจจับการชน (Collision) วางแผน Reach/Cycle Time และส่งออกโปรแกรมควบคุมหุ่นยนต์ (OLP) ไปใช้กับหุ่นยนต์จริงได้
-        </p>
-
-        <h2>ตัวอย่างไฟล์</h2>
-        <p>
-          มีไฟล์ตัวอย่างจริงประกอบเนื้อหาบางบทที่ <a href="examples.html">หน้า Example File</a>
-          และในโฟลเดอร์ <code>examples/</code> ของ repo นี้
-        </p>'''
+        <h2>เรียนจบแล้ว</h2>
+{quiz_card("post-test.html", "หลัง", "แบบทดสอบ 20 ข้อชุดเดียวกับก่อนเรียน และประเมินการเรียน (Feedback) — ผลสอบส่งให้ทางอีเมล")}"""
 
 if __name__ == "__main__":
     write("index.html", page_html("หน้าแรก", BODY, active_top="index"))

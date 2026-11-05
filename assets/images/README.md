@@ -1,51 +1,10 @@
 # Image naming convention
 
-Screenshots for a chapter go in a subfolder named after the section, using the
-same chapter numbering as the `.html` files:
+ภาพหน้าจอของบทเก็บที่ `assets/images/lessons/<NN>-<ลำดับ>.jpg` (เช่นภาพที่ 3 ของบท 04 คือ `04-03.jpg`)
+ตัดจากสไลด์ Step by Step ด้วย `tools/pdf_to_chapter.py` (เฉพาะส่วนภาพหน้าจอพร้อมเลขกำกับสีแดง ไม่รวมหัวสไลด์/footer)
+บีบเป็น JPG กว้างไม่เกิน 1600px ลำดับเลขในภาพตรงกับ `step_list()` ใต้ภาพ
 
-```
-assets/images/<section>/<chapter-number>-<sequence>.png
-```
+ใช้ใน `tools/chapters/lessons_NN.py` ด้วย `screenshot("assets/images/lessons/04-01.jpg", "คำอธิบายภาพ")` —
+เขียน path แบบ root-relative เสมอ `write()` ใน `gen_site.py` จะแปลงให้ตรงกับโฟลเดอร์ของหน้า
 
-Example: the 3rd screenshot in Basic chapter 4 is
-`assets/images/basic/04-03.png`.
-
-## Adding a screenshot to a chapter
-
-In `tools/gen_chapters.py`, use the `screenshot()` helper from `gen_site.py`
-inside the relevant `BODY[(section, idx)]` entry (convert that entry to an
-f-string if it isn't one already):
-
-```python
-BODY[("basic", 4)] = f'''
-...
-{screenshot("assets/images/basic/04-01.png", "หน้าจอสร้าง Operation Pick", caption="สร้าง Operation Pick แล้ว Teach ตำแหน่งหยิบด้วย Jog Panel")}
-...
-'''
-```
-
-Author the path as repo-root-relative (`assets/images/...`) always — `write()`
-in `gen_site.py` rewrites it to the correct relative path for whatever folder
-the page actually lands in, so the same string works whether the chapter ends
-up as `basic/04.html` or anywhere else.
-
-Keep each exported screenshot compressed (PNG optimized or JPG, ideally under
-~300-500KB) — see the "รูปภาพและวิดีโอ" section in the top-level README.md for
-why.
-
-## Adding a YouTube video to a chapter
-
-Same pattern with the `youtube_embed()` helper:
-
-```python
-BODY[("basic", 2)] = f'''
-...
-{youtube_embed("VIDEO_ID_HERE", "ชื่อวิดีโอ")}
-...
-'''
-```
-
-`youtube_embed`/`screenshot` are defined in `tools/gen_site.py` and already
-imported into `tools/gen_chapters.py`. This site does not yet embed any real
-video/screenshot — the helpers are ready and wired in, waiting for real
-media to be added later.
+วิดีโอ: ห้าม commit `.mp4` ขึ้น repo ให้อัปโหลด YouTube แล้วฝังด้วย `youtube_embed(video_id, title)`

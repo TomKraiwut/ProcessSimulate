@@ -1,81 +1,44 @@
 # ProcessSimulate
 
-เว็บไซต์สอนการใช้งาน Siemens Tecnomatix Process Simulate (ภาษาไทย) — เผยแพร่ผ่าน GitHub Pages
+เว็บไซต์สอนการใช้งาน Siemens Tecnomatix Process Simulate แบบ Step by Step (ภาษาไทย) — เผยแพร่ผ่าน GitHub Pages
+เนื้อหามาจากชุดสอน `Training\Basic` (ไฟล์ `.pptx` ของแต่ละบท) โครงเว็บและ generator ใช้แบบเดียวกับ PlantSimulation
 
 ## โครงสร้างเว็บ
 
-แต่ละเมนูมีโฟลเดอร์ของตัวเอง — หน้ารวมบท (hub) อยู่ที่ `<section>/index.html` และบทย่อยอยู่ที่ `<section>/01.html`, `02.html`, ...
-ทำให้เพิ่มบทใหม่ในอนาคตได้โดยแค่เพิ่มไฟล์ในโฟลเดอร์เดิม ไม่ต้องยุ่งกับไฟล์อื่น:
-
-- [index.html](index.html) — หน้าแรก
-- **Basic — พื้นฐาน** ([basic/](basic/index.html)) — 6 บท (`basic/01.html` .. `06.html`)
-- **Intermediate — ขั้นกลาง** ([intermediate/](intermediate/index.html)) — 6 บท (`intermediate/01.html` .. `06.html`)
-- **Advanced — ขั้นสูง** ([advanced/](advanced/index.html)) — 7 บท (`advanced/01.html` .. `07.html`)
-- **Object Reference — สาธิต Object** ([object-reference/](object-reference/index.html)) — 3 หมวด (`object-reference/01.html` .. `03.html`)
-- **Case Study — ตัวอย่างอุตสาหกรรม** ([case-study/](case-study/index.html)) — 4 บท (`case-study/01.html` .. `04.html`)
-- **Tips and Tricks — เทคนิคการทำงาน** ([tips-tricks/](tips-tricks/index.html)) — 4 หมวด (`tips-tricks/01.html` .. `04.html`)
-- [examples.html](examples.html) — ตัวอย่างเซลล์การผลิตจริงเพิ่มเติม (อยู่ที่ root เหมือนเดิม ไม่ใช่ hub ของหมวดที่มีบทย่อย)
-- [assets/style.css](assets/style.css) / [assets/main.js](assets/main.js) — สไตล์และสคริปต์ sidebar กลางของทุกหน้า (อยู่ที่ root เสมอ)
-- [examples/](examples/) — ไฟล์ตัวอย่าง `.psz` (เพิ่มเองได้)
-
-Layout เป็นแบบ off-canvas sidebar (เมนูเลื่อนออกจากด้านขวาเมื่อกดปุ่ม ☰) ทุกหน้าใช้ header/sidebar/footer ชุดเดียวกัน
+- [index.html](index.html) — หน้าแรก (การ์ดของทุกบท)
+- **Step by Step 00–09** ([lessons/](lessons/index.html)) — แต่ละบทเป็นเมนูหลักของตัวเอง `lessons/00.html` .. `04.html`
+  - 00 CAD Import · 01 Part Assembly · 02 Kinematics · 03 Basic Process · 04 Robot and Gripper · 05 BIW Spot Welding · 06 Robot Painting · 07 Robot Press Line · 08 AGV · 09 Human Basic
+- [assets/style.css](assets/style.css) / [assets/main.js](assets/main.js) — สไตล์ (แดง / เทา / ขาว ตามสไลด์) และเมนู off-canvas ที่ใช้ร่วมกันทุกหน้า
 
 ## สร้าง/แก้ไขหน้าเว็บด้วยสคริปต์ (ไม่แก้ไฟล์ .html ตรงๆ)
 
-หน้าเว็บทั้งหมด **ถูก generate จากสคริปต์ Python ในโฟลเดอร์ [tools/](tools/)** ไม่ควรแก้ไฟล์ `.html` ในโฟลเดอร์เนื้อหาตรงๆ
-เพราะจะถูกเขียนทับเมื่อรัน generator ใหม่ โครงสร้างเมนู/สารบัญ/เนื้อหาบทเรียนทั้งหมดอยู่ในสคริปต์เหล่านี้:
+หน้าเว็บทั้งหมดถูก generate จาก Python ในโฟลเดอร์ [tools/](tools/) — ไฟล์ `.html` จะถูกเขียนทับเมื่อรัน generator ใหม่
 
-- [tools/gen_site.py](tools/gen_site.py) — โครงสร้างเมนู (`SECTIONS`, `SECTION_ORDER`), เทมเพลต HTML กลาง (header/sidebar/footer),
-  media helper (`youtube_embed`, `screenshot`, `step_list`, `side_by_side`) และตัว `write()` ที่ย้ายไฟล์ไปโฟลเดอร์ที่ถูกต้อง
-  พร้อมแก้ลิงก์ภายในให้อัตโนมัติ
-- [tools/gen_chapters.py](tools/gen_chapters.py) — เนื้อหาแต่ละบท (`OBJECTIVES`, `BODY` ต่อ `(section, เลขบท)`)
-- [tools/gen_index.py](tools/gen_index.py) — เนื้อหาหน้าแรก
-- [tools/gen_examples.py](tools/gen_examples.py) — เนื้อหาหน้า Example File
-
-**เพิ่มบทใหม่ในหมวดที่มีอยู่แล้ว:** เพิ่มชื่อบทใน `SECTIONS[section]["chapters"]` ใน `gen_site.py`, เพิ่ม `OBJECTIVES[(section, เลขบท)]`
-และ `BODY[(section, เลขบท)]` ใน `gen_chapters.py` แล้วรันสคริปต์ทั้ง 4 ตัวใหม่ตามลำดับ — sidebar/page-nav ของทุกหน้าจะอัปเดตอัตโนมัติ
-
-**เพิ่มหมวดเมนูใหม่ทั้งหมด:** เพิ่ม entry ใหม่ใน `SECTIONS` และ `SECTION_ORDER` ใน `gen_site.py` (ดูตัวอย่าง `object-reference`/
-`case-study`/`tips-tricks` เป็นแบบอ้างอิง) แล้วเพิ่มเนื้อหาใน `gen_chapters.py` เหมือนขั้นตอนข้างบน
-
-รันตามลำดับนี้เสมอหลังแก้สคริปต์ จากโฟลเดอร์ `tools/` (`gen_chapters.py`/`gen_index.py`/`gen_examples.py` import จาก `gen_site.py`):
+- [tools/gen_site.py](tools/gen_site.py) — โครงเมนู (`SECTIONS`), คำอธิบายการ์ด (`HUB_CARD_DESC`), เทมเพลต และ helper (`screenshot`, `step_list`, `side_by_side`, `youtube_embed`)
+- [tools/chapters/](tools/chapters/) — เนื้อหาบทละไฟล์ `lessons_NN.py` มี `OBJECTIVES` และ `BODY` (f-string; ปีกกาจริงต้องเป็น `{{` `}}`, backslash ต้องเป็น `\`)
+- [tools/gen_chapters.py](tools/gen_chapters.py), [tools/gen_index.py](tools/gen_index.py) — สร้างหน้าบท / หน้ารวม / หน้าแรก
 
 ```bash
 cd tools
 python gen_site.py
 python gen_chapters.py
 python gen_index.py
-python gen_examples.py
 ```
 
-## รูปภาพและวิดีโอในบทเรียน
+ทดสอบก่อน push: `python -m http.server 8000` จากโฟลเดอร์นี้ แล้วเปิด `http://localhost:8000/`
 
-โครงสร้างรองรับสื่อไว้พร้อมแล้ว แต่ **ยังไม่มีเนื้อหาจริง** — ใส่เพิ่มได้ทีหลังตามนี้:
+## ทำบทใหม่จากสไลด์ (`pdf_to_chapter.py`)
 
-- **วิดีโอ (YouTube)**: ฝังด้วย `youtube_embed(video_id, title, caption=None)` จาก `tools/gen_site.py` — responsive 16:9,
-  ไม่กินพื้นที่ repo เลยเพราะวิดีโอยังอยู่บน YouTube ทั้งหมด ใช้ `video_id` (ส่วนหลัง `watch?v=` หรือ `youtu.be/`) ไม่ใช่ URL เต็ม
-- **รูปภาพ (screenshot ทีละขั้นตอน)**: ฝังด้วย `screenshot(img_path, alt, caption=None)` — เก็บไฟล์ไว้ที่
-  `assets/images/<section>/<เลขบท>-<ลำดับ>.png` ดูรายละเอียด naming convention เต็มๆ ที่ [assets/images/README.md](assets/images/README.md)
-- ทั้งสอง helper ต้อง `import` เข้า `gen_chapters.py` (มีอยู่แล้ว) และ `BODY[(section, idx)]` ที่จะใช้ต้องเป็น f-string
-  (`f'''...'''`) เพื่อ interpolate `{youtube_embed(...)}` / `{screenshot(...)}` เข้าไปได้
-- **ขนาดไฟล์**: GitHub บล็อกไฟล์เดี่ยวที่เกิน 100MB (เตือนตั้งแต่ 50MB) และแนะนำให้ repo รวมไม่เกิน ~1GB — รูปภาพประกอบ
-  บทเรียน (compress ดีๆ ให้ไม่เกิน ~300-500KB ต่อรูป) ใส่ได้สบายๆ หลายร้อยรูป แต่**ห้าม commit ไฟล์วิดีโอ (.mp4) ขึ้น repo
-  โดยตรงเด็ดขาด** — ต้องอัปโหลดขึ้น YouTube แล้วฝังลิงก์แทนเสมอ
+1. เปิด `.pptx` ใน PowerPoint แล้ว **Save As → PDF** (หรือสั่งผ่าน COM)
+2. `python -X utf8 tools/pdf_to_chapter.py <deck.pdf> <เลขบท>`
+   - ตัดภาพหน้าจอ (พร้อมเลขวงกลมแดง) ของทุกสไลด์ไปที่ `assets/images/lessons/<NN>-<ลำดับ>.jpg`
+   - อ่านคำอธิบายเลขกำกับเป็น `step_list()`, กล่อง หมายเหตุ/ข้อควรจำ เป็น note/tip, สไลด์ตาราง (ไฟล์ในบทเรียน / เช็กลิสต์ / ปัญหาที่พบบ่อย) เป็น `<table>`
+   - สไลด์ภาพรวม/Workflow จะถูกทิ้งเป็นคอมเมนต์ `# TODO` ให้เขียนเอง
+3. แก้ไฟล์ `tools/chapters/lessons_NN.py` — ใส่ OBJECTIVES, ย่อหน้านำ, ตารางภาพรวม และตรวจคำผิด (ข้อความจาก PDF มักมีช่องว่างเพี้ยนระหว่างไทย/อังกฤษ)
+
+เพิ่มบทใหม่: เพิ่มชื่อใน `SECTIONS["lessons"]["chapters"]` และ `"ids"`, เพิ่ม `HUB_CARD_DESC`, แล้วสร้างไฟล์บท
 
 ## วิธีเปิดใช้งานเป็นเว็บไซต์ (GitHub Pages)
 
-1. ไปที่ repo บน GitHub → **Settings → Pages**
-2. หัวข้อ **Build and deployment** เลือก Source เป็น **Deploy from a branch**
-3. เลือก branch `main` และโฟลเดอร์ `/ (root)` แล้วกด **Save**
-4. รอสักครู่ เว็บจะออนไลน์ที่ `https://<username>.github.io/ProcessSimulate/`
-
-### ถ้าตั้งค่าแล้วแต่เว็บขึ้น 404
-
-ถ้าหน้า Settings บอกว่า "currently being built from the main branch" แต่เว็บจริงขึ้น "Site not found" ให้บังคับปลดล็อกปุ่ม Save:
-เปลี่ยน Branch เป็น **None** → Save → รอ 10 วินาที → เปลี่ยนกลับเป็น **main** / **/(root)** → Save อีกครั้ง แล้วเช็คแท็บ **Actions**
-ว่ามี workflow "pages build and deployment" รันสำเร็จ
-
-## ทดสอบในเครื่องก่อน push
-
-หน้าเว็บเป็น static HTML ธรรมดา ไม่มี build step (นอกจากรัน generator เมื่อแก้เนื้อหา) — ทดสอบด้วย static server เช่น
-`python -m http.server 8000` จากโฟลเดอร์นี้ แล้วเปิด `http://localhost:8000/`
+Settings → Pages → Source: **Deploy from a branch** → branch `main`, โฟลเดอร์ `/ (root)` → Save
+ผลลัพธ์อยู่ที่ `https://tomkraiwut.github.io/ProcessSimulate/`

@@ -6,7 +6,7 @@
 <title>หน้าแรก — Process Simulate Tutorial</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=72b73deb">
 </head>
 <body>
 <div id="wrapper">
@@ -14,89 +14,96 @@
     <div class="inner">
       <header id="header">
         <a href="index.html" class="logo"><span>Process Simulate Tutorial</span></a>
-        <button class="menu-toggle" aria-label="เปิดเมนู">☰</button>
+        <button class="menu-toggle" aria-label="เปิดเมนู" aria-expanded="false">☰</button>
       </header>
 
       <main>
         <section id="banner">
           <h1>เรียนรู้ Siemens Tecnomatix Process Simulate</h1>
-          <p class="tagline">เว็บไซต์สอนการใช้งานโปรแกรมจำลองกระบวนการผลิตและหุ่นยนต์อุตสาหกรรม (Robotics &amp; Manufacturing Simulation) ภาษาไทย</p>
+          <p class="tagline">ชุดสอน Step by Step บน Process Simulate ภาษาไทย</p>
           <p class="intro">
-            เนื้อหาแบ่งเป็น 3 ระดับ ตั้งแต่ยังไม่เคยเปิดโปรแกรมมาก่อน ไปจนถึงเขียน .NET API ควบคุมเซลล์
-            และส่งออกโปรแกรมหุ่นยนต์จริงด้วย Offline Programming พร้อมส่วนอ้างอิง Object, Case Study จากอุตสาหกรรมจริง
-            และ Tips and Tricks — เลือกเริ่มจากระดับที่ตรงกับพื้นฐานของคุณได้เลย
+            ลงมือทำทีละบท ตั้งแต่นำเข้า CAD, ประกอบชิ้นส่วน, Kinematics, Basic Process
+            ไปจนถึงหุ่นยนต์และ Gripper, งานเชื่อมจุดตัวถังรถ (BIW), งานพ่นสี, ไลน์ปั๊ม, AGV และคนจำลอง — ทุกบทมีภาพหน้าจอจริงพร้อมเลขกำกับ และตัวเลขที่วัดจริงใน Process Simulate
           </p>
         </section>
 
-        <div class="features">
-          <div class="feature">
-            <h3>🎯 เรียงตามลำดับการใช้งานจริง</h3>
-            <p>แต่ละบทต่อยอดจากบทก่อนหน้า ไม่ต้องท่องจำ ทำตามได้ทันที</p>
-          </div>
-          <div class="feature">
-            <h3>🧪 มีตัวอย่างและคำถามฝึกคิด</h3>
-            <p>ทุกบทมีตัวอย่างที่ลองทำตามได้ พร้อมคำถามท้ายบทเพื่อเช็กความเข้าใจ</p>
-          </div>
-          <div class="feature">
-            <h3>🤖 ครอบคลุมทั้งจำลองและส่งออกจริง</h3>
-            <p>ตั้งแต่หยิบ-วางชิ้นงานพื้นฐาน ไปจนถึง OLP ส่งโปรแกรมเข้าหุ่นยนต์จริง</p>
-          </div>
-        </div>
-
-        <h2>เลือกระดับที่จะเรียน</h2>
+        <h2>เริ่มที่นี่</h2>
         <div class="card-grid">
-          <a href="basic/index.html" class="card">
-            <div class="icon">🧩</div>
-            <h3>Basic — พื้นฐาน</h3>
-            <p>รู้จักหน้าตาโปรแกรม, Object พื้นฐาน, สร้างงาน Pick and Place แรกและรันซิมูเลชัน (6 บท)</p>
-          </a>
-          <a href="intermediate/index.html" class="card">
-            <div class="icon">🔧</div>
-            <h3>Intermediate — ขั้นกลาง</h3>
-            <p>Resource ขั้นกลาง, Path/Location ละเอียดขึ้น, Weld Operation, Collision Set (6 บท)</p>
-          </a>
-          <a href="advanced/index.html" class="card">
-            <div class="icon">⚙️</div>
-            <h3>Advanced — ขั้นสูง</h3>
-            <p>Logic Block, .NET API, Offline Programming, Human Simulation และ Multi-Robot Cell (7 บท)</p>
+          <a href="pre-test.html" class="card">
+            <div class="icon number">ก่อน</div>
+            <h3>แบบทดสอบก่อนเรียน</h3>
+            <p>แบบทดสอบ 20 ข้อ และความคาดหวังต่อการเรียน ประมาณ 15 นาที — ใช้เทียบคะแนนกับหลังเรียน</p>
           </a>
         </div>
 
-        <h2>เนื้อหาเสริม</h2>
+        <h2>Step by Step 00–09</h2>
+        <p>แต่ละบทมีโฟลเดอร์ <code>Library</code> และไฟล์ <code>.psz</code> เรียงเลขตามขั้นตอน
+        เปิดไฟล์ของขั้นไหนก็ได้เป็นจุดเริ่มต้น ไม่ต้องทำขั้นก่อนหน้าให้เสร็จ</p>
         <div class="card-grid">
-          <a href="object-reference/index.html" class="card">
-            <div class="icon">📖</div>
-            <h3>Object Reference</h3>
-            <p>สาธิตการทำงานของแต่ละ Object เป็นหมวดหมู่ ใช้เปิดอ้างอิงเร็วๆ (3 หมวด)</p>
+          <a href="lessons/00.html" class="card">
+            <div class="icon number">00</div>
+            <h3>CAD Import</h3>
+            <p>นำเข้า CAD (JT) แยกชิ้นส่วน สร้าง Gripper และหุ่นยนต์ด้วย Kinematics Editor แล้วติดเครื่องมือ</p>
           </a>
-          <a href="case-study/index.html" class="card">
-            <div class="icon">🏭</div>
-            <h3>Case Study</h3>
-            <p>ตัวอย่างการใช้งานจากสถานการณ์จริงใน 4 อุตสาหกรรม</p>
+          <a href="lessons/01.html" class="card">
+            <div class="icon number">01</div>
+            <h3>Part Assembly</h3>
+            <p>ประกอบชิ้นส่วนด้วย Placement / Relocate สร้าง Operation, Automatic Disassembly และลำดับประกอบ</p>
           </a>
-          <a href="tips-tricks/index.html" class="card">
-            <div class="icon">💡</div>
-            <h3>Tips and Tricks</h3>
-            <p>เทคนิคเล็กๆ น้อยๆ ที่ช่วยประหยัดเวลาและลดข้อผิดพลาด (4 หมวด)</p>
+          <a href="lessons/02.html" class="card">
+            <div class="icon number">02</div>
+            <h3>Kinematics</h3>
+            <p>สร้างกลไก Gantry ด้วย Link, Joint, Pose แล้วสั่ง Device Operation, Attach Event และส่งงาน</p>
+          </a>
+          <a href="lessons/03.html" class="card">
+            <div class="icon number">03</div>
+            <h3>Basic Process</h3>
+            <p>Layout, Object Flow, Pick and Place, Reach Test, Path Editor, Collision, SOP/Gantt และรถยก — cycle time 14.17 วินาที</p>
+          </a>
+          <a href="lessons/04.html" class="card">
+            <div class="icon number">04</div>
+            <h3>Robot and Gripper</h3>
+            <p>กลไก CNC และ Gripper, หุ่น HP20D โหลดเข้า/ออก, Generic Robotic Operation และ Collision Check</p>
+          </a>
+          <a href="lessons/05.html" class="card">
+            <div class="icon number">05</div>
+            <h3>BIW Spot Welding</h3>
+            <p>จุดเชื่อม Weld Point, Gun Search, Fixture, WDC, Mirror Operation, มุม Approach/Departure และ Collision Check — หุ่น 2 ตัว 62.53 วินาที</p>
+          </a>
+          <a href="lessons/06.html" class="card">
+            <div class="icon number">06</div>
+            <h3>Robot Painting</h3>
+            <p>ติด brush กับ gun, External Axes, Create Mesh, Process Generator และ Coverage ของงานพ่นสีฝากระโปรง</p>
+          </a>
+          <a href="lessons/07.html" class="card">
+            <div class="icon number">07</div>
+            <h3>Robot Press Line</h3>
+            <p>Smart Place หาตำแหน่งวางหุ่นหน้าเครื่องปั๊มที่เอื้อมถึงทั้ง pick และ place (28 จาก 81 จุด)</p>
+          </a>
+          <a href="lessons/08.html" class="card">
+            <div class="icon number">08</div>
+            <h3>AGV</h3>
+            <p>Line Simulation, สร้าง AGV, AGV Target, Carpet, Simulation Panel, LiDAR และ EmergencyStop</p>
+          </a>
+          <a href="lessons/09.html" class="card">
+            <div class="icon number">09</div>
+            <h3>Human Basic</h3>
+            <p>คนจำลอง Jack/Jill, Human Posturing, Task Simulation Builder เทียบ 3 ระดับชั้น และ Ergonomics (RULA, Analysis Tools 19 ตัว)</p>
           </a>
         </div>
 
-        <h2>Process Simulate คืออะไร?</h2>
-        <p class="lead">
-          Process Simulate (Tecnomatix Process Simulate) เป็นซอฟต์แวร์จำลองกระบวนการผลิตของ Siemens เน้นการวางแผนและตรวจสอบ
-          การทำงานของหุ่นยนต์อุตสาหกรรม สายการประกอบ และสถานีงานต่างๆ ในรูปแบบ 3 มิติ ก่อนติดตั้งจริงในโรงงาน
-          ช่วยตรวจจับการชน (Collision) วางแผน Reach/Cycle Time และส่งออกโปรแกรมควบคุมหุ่นยนต์ (OLP) ไปใช้กับหุ่นยนต์จริงได้
-        </p>
-
-        <h2>ตัวอย่างไฟล์</h2>
-        <p>
-          มีไฟล์ตัวอย่างจริงประกอบเนื้อหาบางบทที่ <a href="examples.html">หน้า Example File</a>
-          และในโฟลเดอร์ <code>examples/</code> ของ repo นี้
-        </p>
+        <h2>เรียนจบแล้ว</h2>
+        <div class="card-grid">
+          <a href="post-test.html" class="card">
+            <div class="icon number">หลัง</div>
+            <h3>แบบทดสอบหลังเรียน และ Feedback</h3>
+            <p>แบบทดสอบ 20 ข้อชุดเดียวกับก่อนเรียน และประเมินการเรียน (Feedback) — ผลสอบส่งให้ทางอีเมล</p>
+          </a>
+        </div>
       </main>
 
       <footer class="site-footer">
-        Process Simulate Tutorial — เอกสารประกอบการเรียนรู้ภายในทีม
+        Process Simulate Tutorial
       </footer>
     </div>
   </div>
@@ -104,83 +111,28 @@
   <div id="sidebar">
     <div class="inner">
       <nav id="menu">
-        <header class="major"><h2>เมนู</h2></header>
+        <header class="major"><button class="sidebar-close" aria-label="ปิดเมนู">✕</button><h2>เมนู</h2></header>
         <ul>
           <li class="active"><a href="index.html">หน้าแรก</a></li>
-          <li class="has-children">
-            <a href="basic/index.html">Basic — พื้นฐาน</a>
-            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู basic">▾</button>
-            <ul class="submenu">
-              <li><a href="basic/01.html">1. Process Simulate คืออะไร</a></li>
-              <li><a href="basic/02.html">2. หน้าตาโปรแกรม</a></li>
-              <li><a href="basic/03.html">3. Object พื้นฐาน 6 ตัว</a></li>
-              <li><a href="basic/04.html">4. สร้างงานแรก: Pick and Place</a></li>
-              <li><a href="basic/05.html">5. รันและอ่านผลลัพธ์เบื้องต้น</a></li>
-              <li><a href="basic/06.html">6. บันทึกและจัดการไฟล์ Study</a></li>
-            </ul>
-          </li>
-          <li class="has-children">
-            <a href="intermediate/index.html">Intermediate — ขั้นกลาง</a>
-            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู intermediate">▾</button>
-            <ul class="submenu">
-              <li><a href="intermediate/01.html">1. Resource ขั้นกลาง</a></li>
-              <li><a href="intermediate/02.html">2. Path และ Location ขั้นสูง</a></li>
-              <li><a href="intermediate/03.html">3. Weld Point และ Weld Line Operation</a></li>
-              <li><a href="intermediate/04.html">4. Sequence Editor และ PERT chart ขั้นกลาง</a></li>
-              <li><a href="intermediate/05.html">5. Collision Set และการตรวจสอบการชนขั้นสูง</a></li>
-              <li><a href="intermediate/06.html">6. Resource Library และการนำกลับมาใช้ซ้ำ</a></li>
-            </ul>
-          </li>
-          <li class="has-children">
-            <a href="advanced/index.html">Advanced — ขั้นสูง</a>
-            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู advanced">▾</button>
-            <ul class="submenu">
-              <li><a href="advanced/01.html">1. Logic Block และ Signal พื้นฐาน</a></li>
-              <li><a href="advanced/02.html">2. .NET API พื้นฐาน</a></li>
-              <li><a href="advanced/03.html">3. .NET API ขั้นสูง: ไล่อ่าน Study อัตโนมัติ</a></li>
-              <li><a href="advanced/04.html">4. Offline Programming (OLP)</a></li>
-              <li><a href="advanced/05.html">5. Human Simulation เบื้องต้น</a></li>
-              <li><a href="advanced/06.html">6. Multi-Robot Cell และ Interlock</a></li>
-              <li><a href="advanced/07.html">7. Study Manager และการจัดการเวอร์ชันไฟล์</a></li>
-            </ul>
-          </li>
-          <li class="has-children">
-            <a href="object-reference/index.html">Object Reference — สาธิต Object</a>
-            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู object-reference">▾</button>
-            <ul class="submenu">
-              <li><a href="object-reference/01.html">1. Resource Objects</a></li>
-              <li><a href="object-reference/02.html">2. Operation Objects</a></li>
-              <li><a href="object-reference/03.html">3. Logic &amp; Analysis Objects</a></li>
-            </ul>
-          </li>
-          <li class="has-children">
-            <a href="case-study/index.html">Case Study — ตัวอย่างอุตสาหกรรม</a>
-            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู case-study">▾</button>
-            <ul class="submenu">
-              <li><a href="case-study/01.html">1. อุตสาหกรรมยานยนต์ (Body-in-White Welding)</a></li>
-              <li><a href="case-study/02.html">2. งานหยิบจับและบรรจุภัณฑ์ (Material Handling)</a></li>
-              <li><a href="case-study/03.html">3. งานพ่นสี (Paint Shop Simulation)</a></li>
-              <li><a href="case-study/04.html">4. อิเล็กทรอนิกส์ (Precision Pick and Place)</a></li>
-            </ul>
-          </li>
-          <li class="has-children">
-            <a href="tips-tricks/index.html">Tips and Tricks — เทคนิคการทำงาน</a>
-            <button class="submenu-toggle" aria-label="แสดง/ซ่อนเมนู tips-tricks">▾</button>
-            <ul class="submenu">
-              <li><a href="tips-tricks/01.html">1. UI และ Workflow</a></li>
-              <li><a href="tips-tricks/02.html">2. การสร้างโมเดลและดีบัก</a></li>
-              <li><a href="tips-tricks/03.html">3. ประสิทธิภาพการรัน (Performance)</a></li>
-              <li><a href="tips-tricks/04.html">4. .NET API และ Logic Scripting</a></li>
-            </ul>
-          </li>
-          <li><a href="examples.html">Example File</a></li>
+          <li><a href="pre-test.html">แบบทดสอบก่อนเรียน</a></li>
+          <li><a href="lessons/00.html">00. CAD Import</a></li>
+          <li><a href="lessons/01.html">01. Part Assembly</a></li>
+          <li><a href="lessons/02.html">02. Kinematics</a></li>
+          <li><a href="lessons/03.html">03. Basic Process</a></li>
+          <li><a href="lessons/04.html">04. Robot and Gripper</a></li>
+          <li><a href="lessons/05.html">05. BIW Spot Welding</a></li>
+          <li><a href="lessons/06.html">06. Robot Painting</a></li>
+          <li><a href="lessons/07.html">07. Robot Press Line</a></li>
+          <li><a href="lessons/08.html">08. AGV</a></li>
+          <li><a href="lessons/09.html">09. Human Basic</a></li>
+          <li><a href="post-test.html">แบบทดสอบหลังเรียน และ Feedback</a></li>
         </ul>
       </nav>
-      <footer id="footer"><p class="copyright">Process Simulate Tutorial — เอกสารประกอบการเรียนรู้ภายในทีม</p></footer>
+      <footer id="footer"><p class="copyright">Process Simulate Tutorial</p></footer>
     </div>
   </div>
   <div id="sidebar-overlay"></div>
 </div>
-<script src="assets/main.js"></script>
+<script src="assets/main.js?v=30d529e9"></script>
 </body>
 </html>

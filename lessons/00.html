@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>00. CAD Import — Process Simulate Tutorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css?v=72b73deb">
+</head>
+<body>
+<div id="wrapper">
+  <div id="main">
+    <div class="inner">
+      <header id="header">
+        <a href="../index.html" class="logo"><span>Process Simulate Tutorial</span></a>
+        <button class="menu-toggle" aria-label="เปิดเมนู" aria-expanded="false">☰</button>
+      </header>
+
+      <main>
+        <h1>00. CAD Import</h1>
+
+        <div class="objectives">
+          <p>วัตถุประสงค์การเรียนรู้</p>
+          <ol>
+          <li>สร้างโฟลเดอร์ <code>My_Project\Library</code> ตั้ง System Root และเปิด New Study</li>
+          <li>แปลงไฟล์ CAD (.jt) เป็นชิ้นส่วน .cojt แยกชิ้นด้วย New Part แล้วบันทึกด้วย End Modeling</li>
+          <li>สร้าง Gripper: Frame (TCPF / BASEFRAME), Tool Definition และกลไก Crank (RRRR) พร้อม Pose OPEN / CLOSE</li>
+          <li>สร้าง Device (XZ_Gantry, PS_CNC) และหุ่นยนต์ HP20D (7 link, 6 joint) แล้วติด Gripper ด้วย Mount Tool</li>
+          </ol>
+        </div>
+
+<p class="lead" style="max-width:46em;">นำไฟล์ CAD (JT) เข้า Process Simulate ทีละขั้น รวม 22 ขั้น — แปลงเป็นชิ้นส่วน .cojt แยกชิ้น สร้างเครื่องมือจับ (Gripper) อุปกรณ์ (Device) และหุ่นยนต์ HP20D พร้อม Kinematics ชิ้นส่วนที่ได้ถูกนำไปใช้ต่อในบท 01–04</p>
+
+<h2>ภาพรวม: จากไฟล์ CAD สู่ชิ้นส่วนที่ใช้ใน simulation ได้</h2>
+<table>
+<tr><th>ลำดับ</th><th>หัวข้อ</th><th>ทำอะไร</th></tr>
+<tr><td>01</td><td>New Study</td><td>โฟลเดอร์ My_Project + System Root</td></tr>
+<tr><td>02</td><td>Convert CAD</td><td>JT &gt; .cojt ใน Library</td></tr>
+<tr><td>03</td><td>Part</td><td>แยกชิ้น + Compound Part</td></tr>
+<tr><td>04</td><td>Vacuum Gripper</td><td>Frame + Tool Definition</td></tr>
+<tr><td>05</td><td>Gripper 2F85</td><td>Crank RRRR + Pose + Tool Definition</td></tr>
+<tr><td>06</td><td>Device</td><td>XZ_Gantry และ PS_CNC</td></tr>
+<tr><td>07</td><td>Robot HP20D</td><td>7 link, 6 joint + limit</td></tr>
+<tr><td>08</td><td>Robot Frame</td><td>BASEFRAME, TOOLFRAME, Mount Tool</td></tr>
+<tr><td>09</td><td>Geometry + Save</td><td>Create Box + Save .psz</td></tr>
+</table>
+<div class="tip">
+<strong>สิ่งที่ต้องมี:</strong> Process Simulate 2502 · โฟลเดอร์ <code>00_CAD_IMPORT</code> · ไฟล์ JT 6 ไฟล์ + <code>Robot\HP20D.jt</code> · <code>Robot\Specification.pdf</code> · <code>Robot\HP0020D_A00.cojt</code> (เฉลย)
+</div>
+<h2>Workflow: 6 ช่วง</h2>
+<table>
+<tr><th>ช่วง</th><th>งาน</th><th>ทำอะไร</th><th>ได้</th></tr>
+<tr><td>01</td><td>Study</td><td>สร้างโฟลเดอร์ ตั้ง System Root และ New Study</td><td>My_Project</td></tr>
+<tr><td>02</td><td>Part</td><td>Convert Part_Assembly, PLC แล้วแยกชิ้น</td><td>Part</td></tr>
+<tr><td>03</td><td>Tool</td><td>Vacuum + 2F85 (Crank RRRR)</td><td>Gripper</td></tr>
+<tr><td>04</td><td>Device</td><td>XZ_Gantry และ PS_CNC (.cojt ทำเอง)</td><td>Device</td></tr>
+<tr><td>05</td><td>Robot</td><td>HP20D: link, joint, limit, frame</td><td>Robot</td></tr>
+<tr><td>06</td><td>Save</td><td>Create Geometry แล้วบันทึก .psz</td><td>CAD_IMPORT.psz</td></tr>
+</table>
+
+<p class="lead" style="max-width:46em;">นำไฟล์ CAD (JT) เข้า Process Simulate ทีละขั้น รวม 22 ขั้น — แปลงเป็นชิ้นส่วน .cojt แยกชิ้น สร้างเครื่องมือจับ (Gripper) อุปกรณ์ (Device) และหุ่นยนต์ HP20D พร้อม Kinematics ชิ้นส่วนที่ได้ถูกนำไปใช้ต่อในบท 01–04</p>
+
+<h2>ภาพรวม: จากไฟล์ CAD สู่ชิ้นส่วนที่ใช้ใน simulation ได้</h2>
+<table>
+<tr><th>ลำดับ</th><th>หัวข้อ</th><th>ทำอะไร</th></tr>
+<tr><td>01</td><td>New Study</td><td>โฟลเดอร์ My_Project + System Root</td></tr>
+<tr><td>02</td><td>Convert CAD</td><td>JT &gt; .cojt ใน Library</td></tr>
+<tr><td>03</td><td>Part</td><td>แยกชิ้น + Compound Part</td></tr>
+<tr><td>04</td><td>Vacuum Gripper</td><td>Frame + Tool Definition</td></tr>
+<tr><td>05</td><td>Gripper 2F85</td><td>Crank RRRR + Pose + Tool Definition</td></tr>
+<tr><td>06</td><td>Device</td><td>XZ_Gantry และ PS_CNC</td></tr>
+<tr><td>07</td><td>Robot HP20D</td><td>7 link, 6 joint + limit</td></tr>
+<tr><td>08</td><td>Robot Frame</td><td>BASEFRAME, TOOLFRAME, Mount Tool</td></tr>
+<tr><td>09</td><td>Geometry + Save</td><td>Create Box + Save .psz</td></tr>
+</table>
+<div class="tip">
+<strong>สิ่งที่ต้องมี:</strong> Process Simulate · โฟลเดอร์ <code>00_CAD_IMPORT</code> · ไฟล์ JT 6 ไฟล์ + <code>Robot\HP20D.jt</code> · <code>Robot\Specification.pdf</code> · <code>Robot\HP0020D_A00.cojt</code> (เฉลย)
+</div>
+<h2>Workflow: 6 ช่วง</h2>
+<table>
+<tr><th>ช่วง</th><th>งาน</th><th>ทำอะไร</th><th>ได้</th></tr>
+<tr><td>01</td><td>Study</td><td>สร้างโฟลเดอร์ ตั้ง System Root และ New Study</td><td>My_Project</td></tr>
+<tr><td>02</td><td>Part</td><td>Convert Part_Assembly, PLC แล้วแยกชิ้น</td><td>Part</td></tr>
+<tr><td>03</td><td>Tool</td><td>Vacuum + 2F85 (Crank RRRR)</td><td>Gripper</td></tr>
+<tr><td>04</td><td>Device</td><td>XZ_Gantry และ PS_CNC (.cojt ทำเอง)</td><td>Device</td></tr>
+<tr><td>05</td><td>Robot</td><td>HP20D: link, joint, limit, frame</td><td>Robot</td></tr>
+<tr><td>06</td><td>Save</td><td>Create Geometry แล้วบันทึก .psz</td><td>CAD_IMPORT.psz</td></tr>
+</table>
+
+<h2>ขั้นที่ 1: สร้างโฟลเดอร์ My_Project\Library และตั้ง System Root</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-01.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-01.jpg" alt="ขั้นที่ 1: สร้างโฟลเดอร์ My_Project\Library และตั้ง System Root" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">หน้า Welcome ช่อง System Root = ...\00_CAD_IMPORT\My_Project\Library</span></li>
+    <li><span class="num">2</span><span class="text">คลิก New Study (RobcadStudy) แล้ว Create</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ข้อควรจำ:</strong> System Root ใช้ร่วมทั้งเครื่อง ก่อนกลับไปเรียนบท 01-03 ต้องเปลี่ยนกลับเป็นโฟลเดอร์ Library ของบทนั้น ทุกไฟล์ที่ Convert / End Modeling จะไปอยู่ในโฟลเดอร์นี้</div>
+
+<h2>ขั้นที่ 2: File &gt; Import / Export &gt; Convert and Insert CAD Files</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-02.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-02.jpg" alt="ขั้นที่ 2: File &gt; Import / Export &gt; Convert and Insert CAD Files" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">File &gt; Import / Export</span></li>
+    <li><span class="num">2</span><span class="text">Convert and Insert CAD Files &gt; Add...</span></li>
+    <li><span class="num">3</span><span class="text">เลือก Part_Assembly.jt</span></li>
+    <li><span class="num">4</span><span class="text">Open</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 3: File Import Settings ตั้งโฟลเดอร์ปลายทางและ Class</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-03.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-03.jpg" alt="ขั้นที่ 3: File Import Settings ตั้งโฟลเดอร์ปลายทางและ Class" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Path = My_Project\Library</span></li>
+    <li><span class="num">2</span><span class="text">Base class = Part</span></li>
+    <li><span class="num">3</span><span class="text">Compound class PmCompoundPart</span></li>
+    <li><span class="num">4</span><span class="text">Prototype class PmPartPrototype</span></li>
+    <li><span class="num">5</span><span class="text">Insert component ติ๊ก</span></li>
+    <li><span class="num">6</span><span class="text">OK แล้วทำซ้ำกับ PLC.jt จากนั้น Import</span></li>
+    <li><span class="num">7</span><span class="text">Conversion completed successfully</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 4: Set Modeling Scope แล้ว New Part แยก BOLT / COVER</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-04.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-04.jpg" alt="ขั้นที่ 4: Set Modeling Scope แล้ว New Part แยก BOLT / COVER" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก Parts &gt; Modeling &gt; New Part &gt; PartPrototype &gt; OK</span></li>
+    <li><span class="num">2</span><span class="text">ลาก BOLT (ชิ้นใน Part_Assembly) ไปวางใน PartPrototype ใหม่</span></li>
+    <li><span class="num">3</span><span class="text">F2 เปลี่ยนชื่อ BOLT ทำซ้ำกับ COVER</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>ทำไมแยก:</strong> แต่ละชิ้นต้องเป็น Part ของตัวเองจึงจะสร้าง Object Flow / ประกอบทีละชิ้นได้ (บท 01 Part Assembly)</div>
+
+<h2>ขั้นที่ 5: End Modeling บันทึกแต่ละชิ้นเป็น .cojt</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-05.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-05.jpg" alt="ขั้นที่ 5: End Modeling บันทึกแต่ละชิ้นเป็น .cojt" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือกชิ้น &gt; End Modeling &gt; ตั้งชื่อ &gt; Save ใน Library</span></li>
+    <li><span class="num">2</span><span class="text">ได้ COVER.cojt, BOLT.cojt (BASE บันทึกกลับลง Part_Assembly.cojt)</span></li>
+    <li><span class="num">3</span><span class="text">Create Compound Part ลาก BASE BOLT COVER เข้าไป ตั้งชื่อ PART_ASSEMBLY</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 6: Convert Gripper เป็น Resource / Gripper</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-06.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-06.jpg" alt="ขั้นที่ 6: Convert Gripper เป็น Resource / Gripper" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Base class = Resource</span></li>
+    <li><span class="num">2</span><span class="text">Prototype class = Gripper</span></li>
+    <li><span class="num">3</span><span class="text">เพิ่มทั้ง Gripper_Vacuum.jt และ Gripper_2F85.jt แล้ว Import</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 7: Gripper_Vacuum สร้าง TCPF และ BASEFRAME</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-07.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-07.jpg" alt="ขั้นที่ 7: Gripper_Vacuum สร้าง TCPF และ BASEFRAME" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Create Frame by 6 Values: TCPF = (0,0,0) Rx 180 ให้ Z ชี้ลงจากถ้วยดูด</span></li>
+    <li><span class="num">2</span><span class="text">Frame at Circle Center คลิก 3 จุดบนขอบหน้าแปลน หา Z = 80.2 &gt; BASEFRAME (0,0,80.2)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 8: Tool Definition ของ Gripper_Vacuum</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-08.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-08.jpg" alt="ขั้นที่ 8: Tool Definition ของ Gripper_Vacuum" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Tool Type = Gripper</span></li>
+    <li><span class="num">2</span><span class="text">TCP Frame = TCPF</span></li>
+    <li><span class="num">3</span><span class="text">Base Frame = BASEFRAME</span></li>
+    <li><span class="num">4</span><span class="text">Gripping Objects = ถ้วยดูด 4 ชิ้น</span></li>
+    <li><span class="num">5</span><span class="text">ถ้วยดูดเปลี่ยนเป็นสีส้ม = ชิ้นที่จับงาน</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 9: Gripper_2F85 แบ่ง 11 ชิ้นเป็น link ของ Crank</h2>
+<figure class="screenshot">
+  <a href="../assets/images/lessons/00-09.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-09.jpg" alt="ขั้นที่ 9: Gripper_2F85 แบ่ง 11 ชิ้นเป็น link ของ Crank" loading="lazy"></a>
+</figure>
+<div class="tip"><strong>วิธีหา:</strong> Set Modeling Scope แล้วคลิกทีละชิ้นใน tree ชิ้นที่เลือกเป็นสีฟ้า (มองจากด้านล่าง)</div>
+
+<h2>ขั้นที่ 10: Kinematics Editor &gt; Create Crank (RRRR) ใส่จุดหมุน 4 จุด</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-10.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-10.jpg" alt="ขั้นที่ 10: Kinematics Editor &gt; Create Crank (RRRR) ใส่จุดหมุน 4 จุด" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Create Crank (ปุ่มที่ 6 ใน Kinematics Editor) &gt; RRRR &gt; Next</span></li>
+    <li><span class="num">2</span><span class="text">พิมพ์พิกัด 4 จุด (ข้างซ้าย z = 82.43)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 11: เลือกชิ้นส่วนให้แต่ละ link แล้ว Finish</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-11.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-11.jpg" alt="ขั้นที่ 11: เลือกชิ้นส่วนให้แต่ละ link แล้ว Finish" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">คลิก link ในแผนภาพแล้วคลิกชิ้นใน tree</span></li>
+    <li><span class="num">2</span><span class="text">ข้างที่ 2: Fixed = Existing Link fixed_link</span></li>
+    <li><span class="num">3</span><span class="text">ได้กราฟ fixed &gt; input &gt; coupler &gt; output &gt; dummy ทั้ง 2 ข้าง</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 12: Joint Dependency ให้นิ้วสองข้างหุบพร้อมกัน</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-12.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-12.jpg" alt="ขั้นที่ 12: Joint Dependency ให้นิ้วสองข้างหุบพร้อมกัน" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือกเส้น input_j2 &gt; Joint Dependency &gt; Joint Function</span></li>
+    <li><span class="num">2</span><span class="text">Joint Name = input_j1 ได้ (T(input_j1)) &gt; Apply</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 13: Pose OPEN / CLOSE และ Tool Definition ของ 2F85</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-13.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-13.jpg" alt="ขั้นที่ 13: Pose OPEN / CLOSE และ Tool Definition ของ 2F85" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Gripper</span></li>
+    <li><span class="num">2</span><span class="text">TCPF (0,140,91) ปลายนิ้ว</span></li>
+    <li><span class="num">3</span><span class="text">BASEFRAME (0,0,91) หน้าแปลน</span></li>
+    <li><span class="num">4</span><span class="text">Gripping Objects = pad 2550, 13097</span></li>
+    <li><span class="num">5</span><span class="text">End Modeling &gt; Gripper_2F85.cojt</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 14: Create Compound Resource รวม Gripper ทั้งสอง</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-14.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-14.jpg" alt="ขั้นที่ 14: Create Compound Resource รวม Gripper ทั้งสอง" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก Resources &gt; Modeling &gt; Create Compound Resource</span></li>
+    <li><span class="num">2</span><span class="text">F2 ชื่อ GRIPPERS</span></li>
+    <li><span class="num">3</span><span class="text">ลาก Gripper_Vacuum และ Gripper_2F85 เข้าไป</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>ใช้ทำอะไร:</strong> จัดกลุ่ม resource ใน tree ให้หาง่าย ซ่อน/แสดงทั้งกลุ่มได้ในคลิกเดียว</div>
+
+<h2>ขั้นที่ 15: XZ_Gantry นำเข้าเป็น Part แล้วสร้าง New Resource &gt; Device</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-15.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-15.jpg" alt="ขั้นที่ 15: XZ_Gantry นำเข้าเป็น Part แล้วสร้าง New Resource &gt; Device" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Convert XZ_Gantry.jt (Part) &gt; Set Modeling Scope &gt; Resources &gt; New Resource &gt; Device</span></li>
+    <li><span class="num">2</span><span class="text">ลาก Body, X, Z, Conveyor, TCPF เข้า Device ชื่อ XZ_GANTRY ส่วนกล่อง Part ที่เหลือชื่อ BOX</span></li>
+    <li><span class="num">3</span><span class="text">End Modeling &gt; XZ_Gantry_Device.cojt (ต่อด้วยบท 02_KINEMATICS)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 16: PS_CNC ทำ .cojt เองแล้ว Insert Component</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-16.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-16.jpg" alt="ขั้นที่ 16: PS_CNC ทำ .cojt เองแล้ว Insert Component" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">สร้างโฟลเดอร์ PS_CNC.cojt ใน Library แล้วคัดลอก PS_CNC.jt เข้าไป &gt; Modeling &gt; Define Component Type = Device</span></li>
+    <li><span class="num">2</span><span class="text">Insert Component &gt; PS_CNC.cojt ขึ้นเป็น Device ใน Resources</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 17: ทฤษฎีหุ่นยนต์ใน PS ประกอบด้วยอะไร</h2>
+<figure class="screenshot">
+  <a href="../assets/images/lessons/00-17.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-17.jpg" alt="ขั้นที่ 17: ทฤษฎีหุ่นยนต์ใน PS ประกอบด้วยอะไร" loading="lazy"></a>
+</figure>
+
+<h2>ขั้นที่ 18: Convert HP20D.jt เป็น Resource / Robot</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-18.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-18.jpg" alt="ขั้นที่ 18: Convert HP20D.jt เป็น Resource / Robot" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Resource</span></li>
+    <li><span class="num">2</span><span class="text">Robot</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 19: Kinematics Editor สร้าง 7 link</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-19.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-19.jpg" alt="ขั้นที่ 19: Kinematics Editor สร้าง 7 link" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Set Modeling Scope ที่ HP20D &gt; Kinematics Editor &gt; Create Link ทีละ link ตั้งชื่อตามเฉลย</span></li>
+    <li><span class="num">2</span><span class="text">แต่ละ link มี 1 ชิ้น (ตามตารางขั้นที่ 18)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 20: สร้าง 6 joint จากค่าในเฉลย + Specification.pdf</h2>
+<figure class="screenshot">
+  <a href="../assets/images/lessons/00-20.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-20.jpg" alt="ขั้นที่ 20: สร้าง 6 joint จากค่าในเฉลย + Specification.pdf" loading="lazy"></a>
+</figure>
+<div class="tip"><strong>ข้อต่าง:</strong> เฉลยใช้ Limit แบบ Variable ที่ U (ขึ้นกับ L, Upper Arm follow Lower Arm) ในงานนี้ตั้ง Constant -255/+165 ตาม PDF ส่วนแกน From/To อ่านจาก Joint Properties ของเฉลย</div>
+
+<h2>ขั้นที่ 21: BASEFRAME, TOOLFRAME แล้วทดสอบ Joint Jog</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-21.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-21.jpg" alt="ขั้นที่ 21: BASEFRAME, TOOLFRAME แล้วทดสอบ Joint Jog" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Set Baseframe (0,0,0)</span></li>
+    <li><span class="num">2</span><span class="text">Create Toolframe (945,0,1305) Ry 180 ติด Twist</span></li>
+    <li><span class="num">3</span><span class="text">End Modeling &gt; HP20D.cojt</span></li>
+    <li><span class="num">4</span><span class="text">Robot &gt; Joint Jog ขยับ L 30 U 30 B -45</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 22: Mount Tool ติด Gripper_2F85 ที่ TOOLFRAME</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/00-22.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/00-22.jpg" alt="ขั้นที่ 22: Mount Tool ติด Gripper_2F85 ที่ TOOLFRAME" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Tool = Gripper_2F85</span></li>
+    <li><span class="num">2</span><span class="text">Frame = Base Frame (BASEFRAME)</span></li>
+    <li><span class="num">3</span><span class="text">Mount on = HP20D</span></li>
+    <li><span class="num">4</span><span class="text">TOOLFRAME</span></li>
+    <li><span class="num">5</span><span class="text">Apply</span></li>
+  </ol></div>
+</div>
+
+<h2>ไฟล์ที่ได้ใน My_Project\Library</h2>
+<table>
+<tr><th>ไฟล์ .cojt</th><th>ชนิด</th><th>ที่มา</th></tr>
+<tr><td>Part_Assembly / BOLT / COVER</td><td>PartPrototype</td><td>Part_Assembly.jt แยก 3 ชิ้น</td></tr>
+<tr><td>PLC</td><td>PartPrototype</td><td>PLC.jt</td></tr>
+<tr><td>Gripper_Vacuum</td><td>Gripper</td><td>TCPF + BASEFRAME + ถ้วยดูด 4 ชิ้น</td></tr>
+<tr><td>Gripper_2F85</td><td>Gripper</td><td>Crank RRRR 2 ข้าง, Pose OPEN/CLOSE</td></tr>
+<tr><td>XZ_Gantry / XZ_Gantry_Device</td><td>Part / Device</td><td>แยกกล่อง BOX กับ gantry</td></tr>
+<tr><td>PS_CNC</td><td>Device</td><td>.cojt ทำเอง + Define Component Type</td></tr>
+<tr><td>HP20D</td><td>Robot</td><td>7 link 6 joint + frame</td></tr>
+<tr><td>HP0020D_A00</td><td>Robot</td><td>เฉลย (คัดลอกจาก Robot\)</td></tr>
+</table>
+
+<h2>ปัญหาที่พบบ่อยและวิธีแก้</h2>
+<table>
+<tr><th>อาการ</th><th>วิธีแก้</th></tr>
+<tr><td>System Root เป็นสีแดง</td><td>ชี้โฟลเดอร์ที่มีอยู่จริง (My_Project\Library)</td></tr>
+<tr><td>Path ต่อท้ายข้อความเดิม</td><td>ลบให้หมด (End, Shift+Home, Delete) ก่อนพิมพ์</td></tr>
+<tr><td>Combo ไม่เปลี่ยนค่า</td><td>คลิกเปิดแล้วใช้ลูกศร/คลิกเลือกทันที</td></tr>
+<tr><td>Frame ไม่อยู่ใน Gripper</td><td>Set Modeling Scope ที่ Gripper ก่อน Create Frame</td></tr>
+<tr><td>Create Crank: Plane error</td><td>พิมพ์ค่าพิกัดซ้ำแล้วกด Enter</td></tr>
+<tr><td>Link Entities: ชิ้นซ้ำ</td><td>Reedit แล้วลบชิ้นที่อยู่ link อื่น</td></tr>
+<tr><td>Insert .cojt ทำเองขึ้น error</td><td>ต้อง Define Component Type ก่อน (มี TuneData.xml)</td></tr>
+<tr><td>Ctrl+S ไม่บันทึก</td><td>File &gt; Disconnected Study &gt; Save</td></tr>
+</table>
+
+        <div class="page-nav">
+          <a href="../pre-test.html">← ก่อนหน้า: แบบทดสอบก่อนเรียน</a>
+          <a href="01.html">ถัดไป: 01. Part Assembly →</a>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        Process Simulate Tutorial
+      </footer>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="inner">
+      <nav id="menu">
+        <header class="major"><button class="sidebar-close" aria-label="ปิดเมนู">✕</button><h2>เมนู</h2></header>
+        <ul>
+          <li><a href="../index.html">หน้าแรก</a></li>
+          <li><a href="../pre-test.html">แบบทดสอบก่อนเรียน</a></li>
+          <li class="active"><a href="00.html">00. CAD Import</a></li>
+          <li><a href="01.html">01. Part Assembly</a></li>
+          <li><a href="02.html">02. Kinematics</a></li>
+          <li><a href="03.html">03. Basic Process</a></li>
+          <li><a href="04.html">04. Robot and Gripper</a></li>
+          <li><a href="05.html">05. BIW Spot Welding</a></li>
+          <li><a href="06.html">06. Robot Painting</a></li>
+          <li><a href="07.html">07. Robot Press Line</a></li>
+          <li><a href="08.html">08. AGV</a></li>
+          <li><a href="09.html">09. Human Basic</a></li>
+          <li><a href="../post-test.html">แบบทดสอบหลังเรียน และ Feedback</a></li>
+        </ul>
+      </nav>
+      <footer id="footer"><p class="copyright">Process Simulate Tutorial</p></footer>
+    </div>
+  </div>
+  <div id="sidebar-overlay"></div>
+</div>
+<script src="../assets/main.js?v=30d529e9"></script>
+</body>
+</html>

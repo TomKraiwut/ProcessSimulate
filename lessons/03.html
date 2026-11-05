@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03. Basic Process — Process Simulate Tutorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css?v=72b73deb">
+</head>
+<body>
+<div id="wrapper">
+  <div id="main">
+    <div class="inner">
+      <header id="header">
+        <a href="../index.html" class="logo"><span>Process Simulate Tutorial</span></a>
+        <button class="menu-toggle" aria-label="เปิดเมนู" aria-expanded="false">☰</button>
+      </header>
+
+      <main>
+        <h1>03. Basic Process</h1>
+
+        <div class="objectives">
+          <p>วัตถุประสงค์การเรียนรู้</p>
+          <ol>
+          <li>จัดวางชิ้นส่วนในเซลล์ด้วย Placement Manipulator และ Relocate แล้วติด Gripper เข้ากับหุ่นยนต์ด้วย Mount Tool</li>
+          <li>สร้าง Operation (Compound, Object Flow, Pick and Place) ตั้ง Current Operation และเล่น simulation</li>
+          <li>ตรวจ Reach Test ปรับ Motion Type/Speed ใน Path Editor แล้วเทียบเวลา และตรวจ Collision</li>
+          <li>ต่อลำดับงานด้วย Link อ่าน cycle time จาก Gantt และสั่งรถยกด้วย Device Operation + Attach Event</li>
+          <li>ส่งงานด้วย Movie Recorder (.mp4) และ Export to Web (.html)</li>
+          </ol>
+        </div>
+
+<p class="lead" style="max-width:46em;">เซลล์ตัวอย่างที่มี Machine สายพาน หุ่น UR20 พาเลท และรถยก — ทำทีละขั้นรวม 28 ขั้น ตั้งแต่จัดวาง ติดเครื่องมือ
+สร้างงานหยิบ-วาง ตรวจเอื้อมถึงและตรวจชน ไปจนถึงต่อลำดับ 2 กล่อง อ่าน cycle time <strong>14.17 วินาที</strong> สั่งรถยก และส่งงาน</p>
+
+<h2>ภาพรวม: 9 หัวข้อ</h2>
+<table>
+<tr><th>ลำดับ</th><th>หัวข้อ</th><th>ทำอะไร</th></tr>
+<tr><td>01</td><td>Placement / Relocate</td><td>วาง Pallet, Box, UR20 เข้าที่</td></tr>
+<tr><td>02</td><td>Mount Tool</td><td>ติด Vacuum_Gripper เข้า UR20</td></tr>
+<tr><td>03</td><td>Object Flow</td><td>Box_Op เลื่อนกล่องบนสายพาน</td></tr>
+<tr><td>04</td><td>Pick and Place</td><td>RB1 หุ่นหยิบกล่องวางบนพาเลท</td></tr>
+<tr><td>05</td><td>Reach Test</td><td>หุ่นเอื้อมถึงทุก location ไหม</td></tr>
+<tr><td>06</td><td>Path Editor</td><td>Motion Type + Speed แล้วเทียบเวลา</td></tr>
+<tr><td>07</td><td>Collision</td><td>หัวจับชน Machine ไหม</td></tr>
+<tr><td>08</td><td>SOP / Gantt</td><td>กล่องที่ 2 และ cycle time 14.17 วินาที</td></tr>
+<tr><td>09</td><td>Forklift</td><td>Device Operation + Attach Event</td></tr>
+</table>
+
+<div class="tip">
+<strong>สิ่งที่ต้องมี:</strong> Process Simulate · โฟลเดอร์ <code>03_BASIC_PROCESS</code> ที่มี <code>Library\</code> (ไฟล์ <code>.cojt</code> 7 ชิ้น)
+และไฟล์ <code>0_</code> ถึง <code>3_Basic_Process</code> <code>.psz</code>
+</div>
+
+<h2>Workflow: 5 ช่วง 4 ไฟล์</h2>
+<table>
+<tr><th>ช่วง</th><th>งาน</th><th>ทำอะไร</th><th>ไฟล์</th></tr>
+<tr><td>01</td><td>Layout</td><td>Placement, Relocate, Mount Tool</td><td><code>0_Layout</code></td></tr>
+<tr><td>02</td><td>Operation</td><td>Object Flow, Pick and Place, Reach, Path Editor, Collision</td><td><code>1_Operation</code></td></tr>
+<tr><td>03</td><td>SOP</td><td>กล่องที่ 2 + อ่าน cycle time จาก Gantt</td><td><code>2_SOP</code></td></tr>
+<tr><td>04</td><td>Forklift</td><td>Pose, Device Operation, Attach Event</td><td><code>3_Forklift</code></td></tr>
+<tr><td>05</td><td>ส่งงาน</td><td>Movie Recorder และ Export to Web</td><td>ทุกไฟล์</td></tr>
+</table>
+<h2>ขั้นที่ 1: ตั้ง System Root แล้วเปิด 0_Basic_Process_Layout</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-01.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-01.jpg" alt="ขั้นที่ 1: ตั้ง System Root แล้วเปิด 0_Basic_Process_Layout" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">File</span></li>
+    <li><span class="num">2</span><span class="text">Disconnected Study</span></li>
+    <li><span class="num">3</span><span class="text">Open in Standard Mode</span></li>
+    <li><span class="num">4</span><span class="text">เลือก 0_Basic_Process_Layout</span></li>
+    <li><span class="num">5</span><span class="text">Open</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ข้อควรจำ:</strong> System Root บนหน้า Welcome ต้องเป็น <code>...\03_BASIC_PROCESS\Library</code> ก่อนเปิดไฟล์ ไม่เช่นนั้นชิ้นส่วนจะไม่ขึ้น</div>
+
+<h2>ขั้นที่ 2: เป้าหมายจัดของในเซลล์ให้เข้าที่</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-02.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-02.jpg" alt="ขั้นที่ 2: เป้าหมายจัดของในเซลล์ให้เข้าที่" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Machine วางไว้แล้วที่ x -3400</span></li>
+    <li><span class="num">2</span><span class="text">Pallet, UR20, Box ซ้อนกันที่จุด 0</span></li>
+    <li><span class="num">3</span><span class="text">Pallet y -1200 (ขั้น 3)</span></li>
+    <li><span class="num">4</span><span class="text">UR20 ขึ้นขาตั้ง z 750 (ขั้น 5)</span></li>
+    <li><span class="num">5</span><span class="text">Box ปลายสายพาน (ขั้น 4)</span></li>
+  </ol></div>
+</div>
+<p><strong>ก่อน:</strong> ไฟล์ 0 &nbsp;·&nbsp; <strong>หลัง:</strong> เท่ากับไฟล์ 1 (รูปซ้าย = ก่อน, รูปขวา = หลัง)</p>
+
+<h2>ขั้นที่ 3: Placement Manipulator เลื่อน Pallet ไป Y -1200</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-03.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-03.jpg" alt="ขั้นที่ 3: Placement Manipulator เลื่อน Pallet ไป Y -1200" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก Pallet แล้วกด Placement Manipulator เลือกแกน Y</span></li>
+    <li><span class="num">2</span><span class="text">พิมพ์ -1200 กด Enter</span></li>
+    <li><span class="num">3</span><span class="text">Close</span></li>
+    <li><span class="num">4</span><span class="text">Pallet เลื่อนออกมาข้างหุ่น</span></li>
+    <li><span class="num">5</span><span class="text">ป้ายบอก Y: -1200.00</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>หมายเหตุ:</strong> ช่องตัวเลขคือระยะที่เลื่อนจากตำแหน่งเดิม (ไม่ใช่ตำแหน่งสุดท้าย) ลากลูกศรในหน้าจอ 3D ก็ได้ แต่พิมพ์ตัวเลขจะได้ค่าตรงกับไฟล์เฉลย</div>
+
+<h2>ขั้นที่ 4: Placement พิมพ์ตำแหน่ง X Y Z ให้ Box</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-04.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-04.jpg" alt="ขั้นที่ 4: Placement พิมพ์ตำแหน่ง X Y Z ให้ Box" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก Box เปิด Placement Manipulator แล้วกดลูกศรล่างซ้ายเพื่อขยาย</span></li>
+    <li><span class="num">2</span><span class="text">แถวบน = ตำแหน่ง: X = -5400</span></li>
+    <li><span class="num">3</span><span class="text">Z = 800</span></li>
+    <li><span class="num">4</span><span class="text">แถวล่าง = มุมหมุน Rx Ry Rz (ไม่เปลี่ยน)</span></li>
+    <li><span class="num">5</span><span class="text">Close</span></li>
+    <li><span class="num">6</span><span class="text">Box อยู่ปลายสายพานของ Machine</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ข้อควรจำ:</strong> ถ้าต้องหมุนด้วย ให้พิมพ์มุมหมุน (แถวล่าง) ก่อน แล้วค่อยพิมพ์ตำแหน่ง (เหมือนการวางรถยกในขั้นที่ 21)</div>
+
+<h2>ขั้นที่ 5: Relocate ยก UR20 ขึ้นขาตั้งด้วย Frame by 6 values</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-05.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-05.jpg" alt="ขั้นที่ 5: Relocate ยก UR20 ขึ้นขาตั้งด้วย Frame by 6 values" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก UR20 กด Relocate From frame = Self</span></li>
+    <li><span class="num">2</span><span class="text">To frame กดลูกศรข้างช่อง</span></li>
+    <li><span class="num">3</span><span class="text">Frame by 6 values</span></li>
+    <li><span class="num">4</span><span class="text">พิมพ์ Z = 750 (0, 0, 750)</span></li>
+    <li><span class="num">5</span><span class="text">OK</span></li>
+    <li><span class="num">6</span><span class="text">Apply แล้ว Close</span></li>
+    <li><span class="num">7</span><span class="text">UR20 อยู่บนขาตั้ง</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 6: Mount Tool ติด Vacuum_Gripper เข้ากับ UR20</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-06.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-06.jpg" alt="ขั้นที่ 6: Mount Tool ติด Vacuum_Gripper เข้ากับ UR20" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก UR20 &gt; แท็บ Robot &gt; Mount Tool แล้วคลิก Vacuum_Gripper ใน Objects</span></li>
+    <li><span class="num">2</span><span class="text">Frame ของกริปเปอร์ = Base Frame (ขึ้นเอง)</span></li>
+    <li><span class="num">3</span><span class="text">Mount on = UR20</span></li>
+    <li><span class="num">4</span><span class="text">Frame ของหุ่น = TOOLFRAME</span></li>
+    <li><span class="num">5</span><span class="text">Apply แล้ว Close</span></li>
+    <li><span class="num">6</span><span class="text">กริปเปอร์ติดที่ปลายแขนหุ่นและจะเคลื่อนตามแขน</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 7: ก่อนปิดหรือเปิดไฟล์ถัดไป ตอบ No (หรือ Save As)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-07.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-07.jpg" alt="ขั้นที่ 7: ก่อนปิดหรือเปิดไฟล์ถัดไป ตอบ No (หรือ Save As)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">ตอบ No = ไม่เก็บสิ่งที่ลอง ไฟล์ตัวอย่างไม่เปลี่ยน</span></li>
+    <li><span class="num">2</span><span class="text">ถ้าจะเก็บงานใช้ File &gt; Disconnected Study &gt; Save As ชื่อใหม่</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>บทถัดไป:</strong> เปิด 1_Basic_Process_Operation (เฉลยของบท 0) ทุกคนจะเริ่มบท 1 จากจุดเดียวกัน</div>
+
+<h2>ขั้นที่ 8: New Compound Operation (กล่อง CompOp)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-08.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-08.jpg" alt="ขั้นที่ 8: New Compound Operation (กล่อง CompOp)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">แท็บ Operation ลูกศรใต้ New Operation</span></li>
+    <li><span class="num">2</span><span class="text">New Compound Operation</span></li>
+    <li><span class="num">3</span><span class="text">Name (ไฟล์ตัวอย่าง = CompOp)</span></li>
+    <li><span class="num">4</span><span class="text">Scope = Operation Root</span></li>
+    <li><span class="num">5</span><span class="text">OK</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ข้อควรจำ:</strong> Compound Operation คือกล่องรวม operation ย่อย ใช้ตั้งเป็น Current Operation แล้วเล่นทั้งชุด</div>
+
+<h2>ขั้นที่ 9: New Object Flow Operation ให้ Box (Box_Op)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-09.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-09.jpg" alt="ขั้นที่ 9: New Object Flow Operation ให้ Box (Box_Op)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Name = Box_Op</span></li>
+    <li><span class="num">2</span><span class="text">Object = Box (เลือก Box ก่อนเปิดคำสั่ง)</span></li>
+    <li><span class="num">3</span><span class="text">Start Point = ตำแหน่งปัจจุบัน</span></li>
+    <li><span class="num">4</span><span class="text">End Point คลิกช่องเขียวแล้วคลิกจุดปลายทาง</span></li>
+    <li><span class="num">5</span><span class="text">Duration = 5 วินาที</span></li>
+    <li><span class="num">6</span><span class="text">OK</span></li>
+    <li><span class="num">7</span><span class="text">Box เลื่อนตามสายพานมาถึงหุ่น</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>ในไฟล์ตัวอย่าง:</strong> Box_Op มี 2 จุด loc1 &gt; loc และใช้เวลา 5 วินาที (0-5 ใน Sequence Editor)</div>
+
+<h2>ขั้นที่ 10: New Pick and Place Operation ให้ UR20 (RB1)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-10.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-10.jpg" alt="ขั้นที่ 10: New Pick and Place Operation ให้ UR20 (RB1)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Name</span></li>
+    <li><span class="num">2</span><span class="text">Robot = UR20 (เลือกหุ่นก่อน)</span></li>
+    <li><span class="num">3</span><span class="text">Gripper = Vacuum_Gripper</span></li>
+    <li><span class="num">4</span><span class="text">ท่าหยิบ CLOSE</span></li>
+    <li><span class="num">5</span><span class="text">ท่าวาง OPEN</span></li>
+    <li><span class="num">6</span><span class="text">Pick คลิกจุดหยิบ (บน Box)</span></li>
+    <li><span class="num">7</span><span class="text">Place คลิกจุดวาง (บน Pallet)</span></li>
+    <li><span class="num">8</span><span class="text">OK</span></li>
+    <li><span class="num">9</span><span class="text">ผล: RB1 มี 9 location: bPick &gt; pick &gt; aPick &gt; via &gt; bPlace &gt; place &gt; aPlace &gt; via &gt; bPick</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>หมายเหตุ:</strong> ภาพในบทนี้กด Cancel แล้วใช้ RB1 ที่มีอยู่ในไฟล์ (ผู้จัดทำยังไม่เคยทดสอบปุ่ม OK ของคำสั่งนี้)</div>
+
+<h2>ขั้นที่ 11: Set Current Operation แล้วเล่นได้ 9.65 วินาที</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-11.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-11.jpg" alt="ขั้นที่ 11: Set Current Operation แล้วเล่นได้ 9.65 วินาที" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก CompOp &gt; Set Current Operation</span></li>
+    <li><span class="num">2</span><span class="text">Box_Op 0-5 วินาที</span></li>
+    <li><span class="num">3</span><span class="text">RB1 5-9.65 วินาที (4.65)</span></li>
+    <li><span class="num">4</span><span class="text">จบ 9.65</span></li>
+    <li><span class="num">5</span><span class="text">เริ่ม: Box ที่ปลายสายพาน</span></li>
+    <li><span class="num">6</span><span class="text">จบ: Box บน Pallet</span></li>
+  </ol></div>
+</div>
+<p>แกนเวลาเริ่มที่ 0.00 วินาที และจบที่ <strong>9.65 วินาที</strong></p>
+
+<h2>ขั้นที่ 12: Reach Test หุ่นเอื้อมถึงทุก location ไหม</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-12.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-12.jpg" alt="ขั้นที่ 12: Reach Test หุ่นเอื้อมถึงทุก location ไหม" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก RB1 แท็บ Robot &gt; Reach Test (Robot = UR20 ขึ้นเอง)</span></li>
+    <li><span class="num">2</span><span class="text">ทุก location มีเครื่องหมายถูกสีเขียว = เอื้อมถึงครบ 9 จุด</span></li>
+    <li><span class="num">3</span><span class="text">Close</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>ทำไมย้ายมาบทนี้:</strong> Reach Test ทดสอบกับ location เท่านั้น ไฟล์ 0 ยังไม่มี operation รายการจึงว่าง ใช้ตรวจ layout ก่อนส่งงานลูกค้า ถ้าขึ้นกากบาทให้ย้ายหุ่นหรือชิ้นงานแล้วทดสอบใหม่</div>
+
+<h2>ขั้นที่ 13: Path Editor ดู Motion Type, Speed, Zone ของ RB1</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-13.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-13.jpg" alt="ขั้นที่ 13: Path Editor ดู Motion Type, Speed, Zone ของ RB1" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก RB1 แท็บ Path Editor กด Add Operations to Editor</span></li>
+    <li><span class="num">2</span><span class="text">ระยะเวลารวม RB1 = 4.65 วินาที</span></li>
+    <li><span class="num">3</span><span class="text">Motion Type ทุกจุด = PTP (Joint)</span></li>
+    <li><span class="num">4</span><span class="text">Speed = 100 %</span></li>
+    <li><span class="num">5</span><span class="text">Zone = fine (หยุดตรงจุด)</span></li>
+    <li><span class="num">6</span><span class="text">OLP Commands ที่ pick / place = คำสั่งจับ / ปล่อย</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>อ่านค่า:</strong> ค่าทุกจุดเป็นค่าเริ่มต้นที่ PS สร้างให้ ขั้นถัดไปจะเปลี่ยนช่วงหยิบ-วางเป็นเส้นตรง (LIN) แล้วเทียบเวลา</div>
+
+<h2>ขั้นที่ 14: Teach Pendant เปลี่ยน pick เป็น LIN 300 mm/s</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-14.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-14.jpg" alt="ขั้นที่ 14: Teach Pendant เปลี่ยน pick เป็น LIN 300 mm/s" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก pick ใน Path Editor แท็บ Robot &gt; Teach Pendant</span></li>
+    <li><span class="num">2</span><span class="text">Motion Type คลิกช่องค่าให้ขึ้นรายการ</span></li>
+    <li><span class="num">3</span><span class="text">กล่อง OLP Commands: Drive CLOSE, WaitDevice CLOSE, Grip TCPF</span></li>
+    <li><span class="num">4</span><span class="text">เลือก LIN (Speed เปลี่ยนเป็น 1000 mm/s)</span></li>
+    <li><span class="num">5</span><span class="text">Speed = 300 mm/s</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>ทำซ้ำ:</strong> กดลูกศร &gt; (Next) บน Teach Pendant ไปที่ aPick, place, aPlace แล้วตั้ง LIN 300 mm/s เหมือนกัน · ก่อนพิมพ์ Speed ให้ลบค่าเดิมให้หมด (ถ้าไม่ลบจะได้ค่า 99999)</div>
+
+<h2>ขั้นที่ 15: เล่นใหม่แล้วเทียบเวลาก่อน/หลัง</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-15.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-15.jpg" alt="ขั้นที่ 15: เล่นใหม่แล้วเทียบเวลาก่อน/หลัง" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">ก่อน 4.65</span></li>
+    <li><span class="num">2</span><span class="text">หลัง 7.11</span></li>
+    <li><span class="num">3</span><span class="text">แถวที่เปลี่ยนแสดง LIN / 300 mm/s</span></li>
+  </ol></div>
+</div>
+<p>รูปซ้าย = ก่อน (PTP ทุกจุด) · รูปขวา = หลัง (LIN 300 mm/s 4 จุด)</p>
+<table>
+<tr><th>รายการ</th><th>ก่อน</th><th>หลัง</th></tr>
+<tr><td>RB1</td><td>4.65 วินาที</td><td>7.11 วินาที</td></tr>
+<tr><td>pick / aPick / place / aPlace</td><td>0.31-0.40 วินาทีต่อจุด</td><td>0.97 วินาทีต่อจุด</td></tr>
+<tr><td>CompOp (จบ simulation)</td><td>9.65 วินาที</td><td>12.11 วินาที</td></tr>
+</table>
+<div class="tip"><strong>สรุป:</strong> LIN 300 mm/s ช้ากว่า PTP 100 % แต่เดินตรงปลอดภัยกว่าตอนเข้าใกล้ชิ้นงาน ต้องเลือกให้สมดุลระหว่างเวลากับความปลอดภัย</div>
+
+<h2>ขั้นที่ 16: Collision Viewer สร้างชุดตรวจชน</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-16.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-16.jpg" alt="ขั้นที่ 16: Collision Viewer สร้างชุดตรวจชน" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">New Collision Set (ปุ่มแรก)</span></li>
+    <li><span class="num">2</span><span class="text">แท็บ Collision Viewer ใต้หน้าจอ</span></li>
+    <li><span class="num">3</span><span class="text">Check: Vacuum_Gripper, Box</span></li>
+    <li><span class="num">4</span><span class="text">With: Machine</span></li>
+    <li><span class="num">5</span><span class="text">OK</span></li>
+    <li><span class="num">6</span><span class="text">ได้ new_collision_set</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 17: เปิด Collision Mode แล้วเล่นผล: ไม่ชน</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-17.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-17.jpg" alt="ขั้นที่ 17: เปิด Collision Mode แล้วเล่นผล: ไม่ชน" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">แท็บ Home &gt; Collision Mode (ปุ่มเป็นสีฟ้า = เปิด)</span></li>
+    <li><span class="num">2</span><span class="text">เล่น CompOp ตลอด 12 วินาที Collision Viewer ขึ้น No pairs to display (ไม่ชน)</span></li>
+    <li><span class="num">3</span><span class="text">ถ้าชน ชิ้นที่ชนจะเป็นสีแดงและขึ้นคู่ที่ชนในรายการ</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>ใช้กับลูกค้า:</strong> ตรวจชนทุกครั้งหลังแก้ทางเดิน (เช่น เปลี่ยนเป็น LIN ในขั้น 14) เพราะทางเดินใหม่อาจเฉียดเครื่อง</div>
+
+<h2>ขั้นที่ 18: Insert Component ใส่ Box ใบที่ 2 จาก Library</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-18.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-18.jpg" alt="ขั้นที่ 18: Insert Component ใส่ Box ใบที่ 2 จาก Library" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">แท็บ Modeling &gt; Insert Component ไปที่โฟลเดอร์ Library</span></li>
+    <li><span class="num">2</span><span class="text">Box.cojt</span></li>
+    <li><span class="num">3</span><span class="text">Preview แสดงชิ้นงาน</span></li>
+    <li><span class="num">4</span><span class="text">Open</span></li>
+    <li><span class="num">5</span><span class="text">Box ใหม่ขึ้นใน Parts (ไฟล์ 2 ตั้งชื่อ Box_1)</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 19: ไฟล์ 2 เรียงลำดับ 4 operation ด้วย Link</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-19.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-19.jpg" alt="ขั้นที่ 19: ไฟล์ 2 เรียงลำดับ 4 operation ด้วย Link" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Box_Op 0-5 วินาที</span></li>
+    <li><span class="num">2</span><span class="text">RB1 5-9.72 วินาที</span></li>
+    <li><span class="num">3</span><span class="text">Box_1_Op 5-10 วินาที เริ่มพร้อม RB1 (ขนานกัน)</span></li>
+    <li><span class="num">4</span><span class="text">RB2 10-14.17 วินาที</span></li>
+    <li><span class="num">5</span><span class="text">จบ 14.17 วินาที</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>Link:</strong> เลือก 2 operation ใน Sequence Editor ตามลำดับ แล้วกดปุ่ม Link — ตัวที่ 2 จะเริ่มเมื่อตัวแรกจบ (ลูกศรสีดำ)</div>
+
+<h2>ขั้นที่ 20: อ่าน cycle time ทำไมไม่ใช่ผลบวกตรงๆ</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-20.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-20.jpg" alt="ขั้นที่ 20: อ่าน cycle time ทำไมไม่ใช่ผลบวกตรงๆ" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">9.70: กล่องแรกวางแล้วกล่องที่ 2 มาถึงปลายสายพานพอดี</span></li>
+    <li><span class="num">2</span><span class="text">14.17: กล่อง 2 ใบซ้อนบน Pallet</span></li>
+  </ol></div>
+</div>
+<table>
+<tr><th>วิธีคิด</th><th>ผล</th></tr>
+<tr><td>ผลบวกตรงๆ: 5 + 4.72 + 5 + 4.17</td><td>18.89 วินาที</td></tr>
+<tr><td>เวลาจริงจาก Gantt</td><td><strong>14.17 วินาที</strong> (เร็วกว่า 4.72 วินาที)</td></tr>
+</table>
+<div class="tip"><strong>ข้อคิด:</strong> Box_1_Op วิ่งระหว่างที่หุ่นทำ RB1 (ทำงานขนานกัน) cycle time จึงสั้นกว่าผลบวก การจัดลำดับให้งานทับกันได้คือวิธีลดเวลาโดยไม่ต้องเร่งหุ่น</div>
+
+<h2>ขั้นที่ 21: ใส่ Forklift แล้ววางที่ (3500, -1200, 0) หมุน Rz 180</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-21.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-21.jpg" alt="ขั้นที่ 21: ใส่ Forklift แล้ววางที่ (3500, -1200, 0) หมุน Rz 180" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Insert Component &gt; Forklift.cojt &gt; Open</span></li>
+    <li><span class="num">2</span><span class="text">Preview รถยก</span></li>
+    <li><span class="num">3</span><span class="text">Placement ขยายแล้วพิมพ์ Rz = 180 ก่อน</span></li>
+    <li><span class="num">4</span><span class="text">แล้ว X = 3500</span></li>
+    <li><span class="num">5</span><span class="text">Y = -1200</span></li>
+    <li><span class="num">6</span><span class="text">รถยกหันงาเข้าหา Pallet</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 22: Object Flow ของรถยกวิ่งไปที่ Pallet (Forklift_Op)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-22.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-22.jpg" alt="ขั้นที่ 22: Object Flow ของรถยกวิ่งไปที่ Pallet (Forklift_Op)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Name = Forklift_Op</span></li>
+    <li><span class="num">2</span><span class="text">Object = Forklift</span></li>
+    <li><span class="num">3</span><span class="text">End Point คลิกช่องเขียวแล้วคลิก Pallet ในหน้าจอ 3D</span></li>
+    <li><span class="num">4</span><span class="text">Duration 5 วินาที</span></li>
+    <li><span class="num">5</span><span class="text">รถยกที่จุดเริ่ม</span></li>
+    <li><span class="num">6</span><span class="text">ปลายทาง: Pallet</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>ระวัง:</strong> ถ้า Objects tree ถูกหน้าต่างบัง ให้คลิก Pallet ในหน้าจอ 3D แทน (คลิกใน tree ไม่ติด)</div>
+
+<h2>ขั้นที่ 23: Pose Editor ของรถยก HOME และ UP (j1 = 500)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-23.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-23.jpg" alt="ขั้นที่ 23: Pose Editor ของรถยก HOME และ UP (j1 = 500)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">เลือก Forklift &gt; Modeling &gt; Pose Editor: HOME, UP</span></li>
+    <li><span class="num">2</span><span class="text">เลือก UP กด Jump</span></li>
+    <li><span class="num">3</span><span class="text">กด New ดู Joint Jog: ท่าปัจจุบัน UP</span></li>
+    <li><span class="num">4</span><span class="text">j1 = 500 mm (ยกงาขึ้น)</span></li>
+    <li><span class="num">5</span><span class="text">ช่วงที่ยกได้ 0-1500</span></li>
+    <li><span class="num">6</span><span class="text">งายกขึ้นในหน้าจอ 3D</span></li>
+  </ol></div>
+</div>
+<div class="note"><strong>หมายเหตุ:</strong> Edit เป็นสีเทาเพราะ pose มาจาก Library (แก้ได้ใน Modeling Scope แบบบท Kinematics) ภาพนี้กด Cancel แล้ว Jump กลับ HOME</div>
+
+<h2>ขั้นที่ 24: New Device Operation สั่งรถยกยกงา (Forklift_UP)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-24.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-24.jpg" alt="ขั้นที่ 24: New Device Operation สั่งรถยกยกงา (Forklift_UP)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Name (ไฟล์ตัวอย่าง = Forklift_UP)</span></li>
+    <li><span class="num">2</span><span class="text">Device = Forklift (เลือกก่อนเปิดคำสั่ง)</span></li>
+    <li><span class="num">3</span><span class="text">From pose = ท่าปัจจุบัน</span></li>
+    <li><span class="num">4</span><span class="text">To pose = UP</span></li>
+    <li><span class="num">5</span><span class="text">Duration = 5 วินาที</span></li>
+    <li><span class="num">6</span><span class="text">OK</span></li>
+    <li><span class="num">7</span><span class="text">ในไฟล์ 3: Forklift_UP ต่อจาก Forklift_Op จบที่ 24.17 วินาที</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 25: Attach Event ติด Pallet + Box + Box_1 กับงารถยก (lnk2)</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-25.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-25.jpg" alt="ขั้นที่ 25: Attach Event ติด Pallet + Box + Box_1 กับงารถยก (lnk2)" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">Pallet</span></li>
+    <li><span class="num">2</span><span class="text">Box</span></li>
+    <li><span class="num">3</span><span class="text">Box_1</span></li>
+    <li><span class="num">4</span><span class="text">To Object = lnk2 (link ของงา: กด + หน้า Forklift ใน Objects)</span></li>
+    <li><span class="num">5</span><span class="text">Start Time = 0</span></li>
+    <li><span class="num">6</span><span class="text">After Start of Task</span></li>
+    <li><span class="num">7</span><span class="text">Forklift มีชิ้นย่อย (lnk) ให้เลือก</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>วิธีเปิดหน้าต่างนี้:</strong> คลิกแถบ <code>Forklift_UP</code> ใน Sequence Editor &gt; Operation &gt; New Event &gt; Attach Event
+(ภาพนี้คือ Edit Event ของ event ในไฟล์เฉลย)</div>
+
+<h2>ขั้นที่ 26: ข้อควรระวัง — ติดแค่ Pallet กล่องจะไม่ยกตาม</h2>
+<figure class="screenshot">
+  <a href="../assets/images/lessons/03-26.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-26.jpg" alt="ขั้นที่ 26: เทียบการ Attach ที่ถูกกับที่ผิด" loading="lazy"></a>
+</figure>
+<table>
+<tr><th></th><th>ติด Pallet + Box + Box_1 (ถูก)</th><th>ติดแค่ Pallet (ผิด)</th></tr>
+<tr><td>ที่ 20.20 วินาที</td><td>กล่องยกขึ้นพร้อมพาเลท</td><td>พาเลทยกขึ้น แต่กล่องค้างที่ระดับเดิม</td></tr>
+<tr><td>จบที่ 24.17 วินาที</td><td>กล่องอยู่บนพาเลท</td><td>กล่องจมทะลุพาเลทและหายไปใต้พาเลท</td></tr>
+</table>
+
+<h2>ขั้นที่ 27: Movie Recorder อัดวิดีโอ .mp4</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-27.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-27.jpg" alt="ขั้นที่ 27: Movie Recorder อัดวิดีโอ .mp4" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">แท็บ Operation &gt; Movie Recorder แล้วกดเฟือง (Settings)</span></li>
+    <li><span class="num">2</span><span class="text">ปุ่มแดง = Record แล้วกด Play</span></li>
+    <li><span class="num">3</span><span class="text">Stop เมื่อเล่นจบ</span></li>
+    <li><span class="num">4</span><span class="text">ป้าย REC ขึ้นในหน้าจอ 3D ระหว่างอัด</span></li>
+    <li><span class="num">5</span><span class="text">Destination โฟลเดอร์เก็บไฟล์</span></li>
+    <li><span class="num">6</span><span class="text">Format MPEG-4 (.mp4)</span></li>
+    <li><span class="num">7</span><span class="text">ความละเอียด FullHD</span></li>
+    <li><span class="num">8</span><span class="text">OK</span></li>
+  </ol></div>
+</div>
+
+<h2>ขั้นที่ 28: Export to Web ส่งงานให้คนที่ไม่มี Process Simulate</h2>
+<div class="side-by-side">
+  <div><figure class="screenshot">
+  <a href="../assets/images/lessons/03-28.jpg" target="_blank" rel="noopener"><img src="../assets/images/lessons/03-28.jpg" alt="ขั้นที่ 28: Export to Web ส่งงานให้คนที่ไม่มี Process Simulate" loading="lazy"></a>
+</figure></div>
+  <div><ol class="step-list">
+    <li><span class="num">1</span><span class="text">File &gt; Import / Export &gt; Export to Web แล้วตั้ง File name .html</span></li>
+    <li><span class="num">2</span><span class="text">Launch in browser เปิดไฟล์ทันทีหลังสร้าง</span></li>
+    <li><span class="num">3</span><span class="text">Level of details Low = ไฟล์เล็ก</span></li>
+    <li><span class="num">4</span><span class="text">ติ๊ก Include simulation</span></li>
+    <li><span class="num">5</span><span class="text">Operation คลิกช่องเขียวแล้วคลิก CompOp</span></li>
+    <li><span class="num">6</span><span class="text">OK</span></li>
+  </ol></div>
+</div>
+<div class="tip"><strong>ผลลัพธ์:</strong> ได้ไฟล์ HTML ไฟล์เดียว เปิดด้วย browser หมุนดูโมเดลและเล่น simulation ได้ (ตัวอย่างไฟล์จริง: <code>02_KINEMATICS\KINEMATICS_WebView.html</code>)</div>
+
+<h2>ไฟล์ในบทเรียนและสิ่งที่อยู่ในแต่ละไฟล์</h2>
+<table>
+<tr><th>ไฟล์</th><th>สถานะ layout</th><th>Operation</th></tr>
+<tr><td><code>0_Basic_Process_Layout.psz</code></td><td>Machine x -3400 / Pallet, UR20, Box ที่จุด 0</td><td>ไม่มี</td></tr>
+<tr><td><code>1_Basic_Process_Operation.psz</code></td><td>Pallet y -1200, UR20 z 750 + Gripper, Box (-5400, 0, 800)</td><td>CompOp: Box_Op + RB1 = 9.65 วินาที</td></tr>
+<tr><td><code>2_Basic_Process_SOP.psz</code></td><td>+ Box_1 ที่ตำแหน่งเดียวกับ Box</td><td>+ Box_1_Op + RB2 = 14.17 วินาที</td></tr>
+<tr><td><code>3_Basic_Process_Forklift.psz</code></td><td>+ Forklift (3500, -1200, 0, Rz 180) pose HOME / UP</td><td>+ Forklift_Op + Forklift_UP = 24.17 วินาที</td></tr>
+<tr><td><code>Library\</code></td><td colspan="2">Box, Cobot_Stand, Forklift, Machine, Pallet, Vacuum_Gripper, Robots\UR20 — ใช้เป็น System Root</td></tr>
+</table>
+
+<h2>เช็กลิสต์: ทำได้ครบหรือยัง</h2>
+<table>
+<tr><th>ข้อ</th><th>สิ่งที่ต้องทำได้</th><th>ตรวจด้วย</th></tr>
+<tr><td>1</td><td>วางของด้วย Placement (แกน / พิมพ์ค่า) และ Relocate</td><td>ตำแหน่งตรงกับไฟล์ 1</td></tr>
+<tr><td>2</td><td>Mount Tool</td><td>กริปเปอร์ติดปลายแขน UR20</td></tr>
+<tr><td>3</td><td>สร้าง Compound, Object Flow, Pick and Place</td><td>CompOp &gt; Box_Op, RB1</td></tr>
+<tr><td>4</td><td>Reach Test</td><td>ทุก location เป็นเครื่องหมายถูกสีเขียว</td></tr>
+<tr><td>5</td><td>เปลี่ยน Motion Type / Speed แล้วเทียบเวลา</td><td>RB1 4.65 &rarr; 7.11 วินาที</td></tr>
+<tr><td>6</td><td>สร้าง Collision Set และอ่านผล</td><td>No pairs to display</td></tr>
+<tr><td>7</td><td>อ่าน cycle time จาก Gantt</td><td>อธิบายได้ว่าทำไม 14.17 ไม่ใช่ 18.89</td></tr>
+<tr><td>8</td><td>Device Operation + Attach Event ให้รถยก</td><td>พาเลทและกล่องยกขึ้นพร้อมกัน</td></tr>
+<tr><td>9</td><td>อัดวิดีโอ / Export to Web</td><td>ได้ไฟล์ .mp4 / .html</td></tr>
+</table>
+
+<h2>ปัญหาที่พบบ่อยและวิธีแก้</h2>
+<table>
+<tr><th>อาการ</th><th>วิธีแก้</th></tr>
+<tr><td>เปิด .psz แล้วชิ้นส่วนไม่ขึ้น</td><td>System Root ต้องชี้ <code>03_BASIC_PROCESS\Library</code> แล้วเปิดไฟล์ใหม่</td></tr>
+<tr><td>เมนูลูกศร To frame ปิดก่อนคลิก</td><td>กดลูกศรใหม่ แล้วคลิก Frame by 6 values ทันที</td></tr>
+<tr><td>Reach Test รายการว่าง</td><td>ต้องมี operation / location ก่อน (ทดสอบในไฟล์ 1)</td></tr>
+<tr><td>แก้ค่าในตาราง Path Editor ไม่ได้</td><td>เลือก location แล้วใช้ Teach Pendant</td></tr>
+<tr><td>พิมพ์ Speed แล้วได้ 99999</td><td>ลบค่าเดิมในช่องให้หมดก่อนพิมพ์</td></tr>
+<tr><td>End Point ของ Object Flow ไม่ขึ้น</td><td>tree ถูกหน้าต่างบัง ให้คลิกชิ้นงานในหน้าจอ 3D แทน</td></tr>
+<tr><td>รถยกยกพาเลทแต่กล่องค้าง</td><td>ใส่ Box, Box_1 ใน Attach ด้วย และ To Object = lnk2</td></tr>
+<tr><td>ปิดไฟล์แล้วถาม Save</td><td>No = ไม่เก็บสิ่งที่ลอง ถ้าจะเก็บใช้ Save As ชื่อใหม่</td></tr>
+</table>
+
+        <div class="page-nav">
+          <a href="02.html">← ก่อนหน้า: 02. Kinematics</a>
+          <a href="04.html">ถัดไป: 04. Robot and Gripper →</a>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        Process Simulate Tutorial
+      </footer>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="inner">
+      <nav id="menu">
+        <header class="major"><button class="sidebar-close" aria-label="ปิดเมนู">✕</button><h2>เมนู</h2></header>
+        <ul>
+          <li><a href="../index.html">หน้าแรก</a></li>
+          <li><a href="../pre-test.html">แบบทดสอบก่อนเรียน</a></li>
+          <li><a href="00.html">00. CAD Import</a></li>
+          <li><a href="01.html">01. Part Assembly</a></li>
+          <li><a href="02.html">02. Kinematics</a></li>
+          <li class="active"><a href="03.html">03. Basic Process</a></li>
+          <li><a href="04.html">04. Robot and Gripper</a></li>
+          <li><a href="05.html">05. BIW Spot Welding</a></li>
+          <li><a href="06.html">06. Robot Painting</a></li>
+          <li><a href="07.html">07. Robot Press Line</a></li>
+          <li><a href="08.html">08. AGV</a></li>
+          <li><a href="09.html">09. Human Basic</a></li>
+          <li><a href="../post-test.html">แบบทดสอบหลังเรียน และ Feedback</a></li>
+        </ul>
+      </nav>
+      <footer id="footer"><p class="copyright">Process Simulate Tutorial</p></footer>
+    </div>
+  </div>
+  <div id="sidebar-overlay"></div>
+</div>
+<script src="../assets/main.js?v=30d529e9"></script>
+</body>
+</html>
